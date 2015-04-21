@@ -57,6 +57,7 @@
             this.lbl_compweight_val = new System.Windows.Forms.Label();
             this.lbl_compweight = new System.Windows.Forms.Label();
             this.chk_jokers = new System.Windows.Forms.CheckBox();
+            this.chk_fastshuffle = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.gbox_log.SuspendLayout();
@@ -77,7 +78,7 @@
             this.btn_start.Location = new System.Drawing.Point(12, 12);
             this.btn_start.Name = "btn_start";
             this.btn_start.Size = new System.Drawing.Size(75, 23);
-            this.btn_start.TabIndex = 2;
+            this.btn_start.TabIndex = 0;
             this.btn_start.Text = "&Start";
             this.btn_start.UseVisualStyleBackColor = true;
             this.btn_start.Click += new System.EventHandler(this.btn_start_Click);
@@ -102,13 +103,14 @@
             0});
             this.num_iterations.Name = "num_iterations";
             this.num_iterations.Size = new System.Drawing.Size(118, 20);
-            this.num_iterations.TabIndex = 3;
+            this.num_iterations.TabIndex = 1;
             this.num_iterations.ThousandsSeparator = true;
             this.num_iterations.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
+            this.num_iterations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.num_iterations_KeyPress);
             // 
             // statusStrip1
             // 
@@ -140,7 +142,8 @@
             this.lbox_log.Name = "lbox_log";
             this.lbox_log.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.lbox_log.Size = new System.Drawing.Size(429, 277);
-            this.lbox_log.TabIndex = 0;
+            this.lbox_log.TabIndex = 6;
+            this.lbox_log.TabStop = false;
             // 
             // gbox_log
             // 
@@ -292,7 +295,7 @@
             this.btn_clearlog.Location = new System.Drawing.Point(108, 273);
             this.btn_clearlog.Name = "btn_clearlog";
             this.btn_clearlog.Size = new System.Drawing.Size(101, 23);
-            this.btn_clearlog.TabIndex = 12;
+            this.btn_clearlog.TabIndex = 5;
             this.btn_clearlog.Text = "Clear &Log";
             this.btn_clearlog.UseVisualStyleBackColor = true;
             this.btn_clearlog.Click += new System.EventHandler(this.btn_clearlog_Click);
@@ -302,7 +305,7 @@
             this.btn_clear.Location = new System.Drawing.Point(6, 273);
             this.btn_clear.Name = "btn_clear";
             this.btn_clear.Size = new System.Drawing.Size(101, 23);
-            this.btn_clear.TabIndex = 11;
+            this.btn_clear.TabIndex = 4;
             this.btn_clear.Text = "&Clear Stats";
             this.btn_clear.UseVisualStyleBackColor = true;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
@@ -373,15 +376,28 @@
             this.chk_jokers.Location = new System.Drawing.Point(282, 18);
             this.chk_jokers.Name = "chk_jokers";
             this.chk_jokers.Size = new System.Drawing.Size(57, 17);
-            this.chk_jokers.TabIndex = 11;
+            this.chk_jokers.TabIndex = 2;
             this.chk_jokers.Text = "&Jokers";
             this.chk_jokers.UseVisualStyleBackColor = true;
+            this.chk_jokers.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.chk_jokers_KeyPress);
+            // 
+            // chk_fastshuffle
+            // 
+            this.chk_fastshuffle.AutoSize = true;
+            this.chk_fastshuffle.Location = new System.Drawing.Point(345, 18);
+            this.chk_fastshuffle.Name = "chk_fastshuffle";
+            this.chk_fastshuffle.Size = new System.Drawing.Size(82, 17);
+            this.chk_fastshuffle.TabIndex = 3;
+            this.chk_fastshuffle.Text = "&Fast Shuffle";
+            this.chk_fastshuffle.UseVisualStyleBackColor = true;
+            this.chk_fastshuffle.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.chk_fastshuffle_KeyPress);
             // 
             // War
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 372);
+            this.Controls.Add(this.chk_fastshuffle);
             this.Controls.Add(this.chk_jokers);
             this.Controls.Add(this.gbox_log);
             this.Controls.Add(this.statusStrip1);
@@ -436,6 +452,7 @@
         private System.Windows.Forms.Label lbl_turns_val;
         private System.Windows.Forms.Label lbl_turns;
         private System.Windows.Forms.CheckBox chk_jokers;
+        private System.Windows.Forms.CheckBox chk_fastshuffle;
     }
 }
 

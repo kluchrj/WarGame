@@ -29,17 +29,6 @@ namespace WarGUI
         {
             InitializeComponent();
 
-            PlayerWins = 0;
-            ComputerWins = 0;
-            Draws = 0;
-            CorrectPred = 0;
-            IncorrectPred = 0;
-
-            WeightedToPlayer = 0;
-            WeightedToComputer = 0;
-
-            Turns = 0;
-
             num_iterations.Maximum = long.MaxValue;
         }
 
@@ -58,17 +47,18 @@ namespace WarGUI
             if (!WarWorker.IsBusy)
             {
                 btn_start.Text = "&Stop";
-                btn_start.Update();
 
                 num_iterations.Enabled = false;
                 chk_jokers.Enabled = false;
-                num_iterations.Update();
+                chk_fastshuffle.Enabled = false;
+
+                btn_start.Focus();
 
                 lbl_status.Text = String.Format("Simulating (0/{0})", num_iterations.Value);
-                LogMessage(String.Format("Simulating {0} games", num_iterations.Value));
+                LogMessage(String.Format("Simulating {0} games...", num_iterations.Value));
 
                 long i = (long)num_iterations.Value;
-                
+
                 WarWorker.RunWorkerAsync(i);
             }
             else
@@ -103,6 +93,31 @@ namespace WarGUI
             lbox_log.Items.Clear();
         }
 
+        // Start when we press enter inside boxes
+        private void num_iterations_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                btn_start_Click(sender, e);
+            }
+        }
+
+        private void chk_jokers_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                btn_start_Click(sender, e);
+            }
+        }
+
+        private void chk_fastshuffle_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                btn_start_Click(sender, e);
+            }
+        }
+
         // Worker functions
         //----------------------------------------------------------------------------------------------------------
 
@@ -117,6 +132,8 @@ namespace WarGUI
 
             long j = (long)e.Argument;
             long i = 0;
+
+            bool fast = chk_fastshuffle.Checked;
             
             PopulateDeck(CardDeck, chk_jokers.Checked);
 
@@ -124,7 +141,7 @@ namespace WarGUI
             
             while (i < j && !WarWorker.CancellationPending)
             {
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck);
+                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fast);
                 
                 if (result.GetWiner == Winner.Player)
                 {
@@ -206,6 +223,7 @@ namespace WarGUI
             btn_start.Text = "&Start";
             num_iterations.Enabled = true;
             chk_jokers.Enabled = true;
+            chk_fastshuffle.Enabled = true;
 
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = 0;
@@ -213,9 +231,13 @@ namespace WarGUI
 
         //----------------------------------------------------------------------------------------------------------
 
-        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck)
+        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle)
         {
-            CardDeck.Shuffle();
+            if (FastShuffle)
+                CardDeck.FastShuffle();
+            else
+                CardDeck.Shuffle();
+
             DealCards(PlayerDeck, ComputerDeck, CardDeck);
 
             // Calculate hand weight for each player
