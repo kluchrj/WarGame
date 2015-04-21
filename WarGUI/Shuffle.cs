@@ -17,11 +17,13 @@ namespace WarGUI
 
         public static void Shuffle<T>(this IList<T> list)
         {
-            for (var i = list.Count - 1; i > 1; i--)
+            int i = list.Count;
+            while (i > 1)
             {
                 byte[] box = new byte[1];
                 do provider.GetBytes(box);
                 while (!(box[0] < i * (Byte.MaxValue / i)));
+                i--;
                 list.Swap(i, (box[0] % i));
             }
         }

@@ -124,7 +124,10 @@ namespace WarGUI
         private void WarWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             // Record when the operation started
-            DateTime start = DateTime.Now;
+            DateTime Start = DateTime.Now;
+
+            // Record When we last updated the UI
+            DateTime LastUpdated = DateTime.Now;
 
             List<Deck> CardDeck = new List<Deck>();
             Queue<Deck> PlayerDeck = new Queue<Deck>();
@@ -137,7 +140,7 @@ namespace WarGUI
             
             PopulateDeck(CardDeck, chk_jokers.Checked);
 
-            StatsInfo stat = new StatsInfo(start);
+            StatsInfo stat = new StatsInfo(Start);
             
             while (i < j && !WarWorker.CancellationPending)
             {
@@ -174,10 +177,12 @@ namespace WarGUI
                 i++;
 
                 // The UI thread can lock if we update it too much
-                if (i % 4 == 0)
+                TimeSpan diff = DateTime.Now - LastUpdated;
+                if (diff.TotalMilliseconds > 50)
                 {
                     double precentage = ((double)i / (double)j) * 100.0;
                     WarWorker.ReportProgress((int)precentage, i);
+                    LastUpdated = DateTime.Now;
                 }
             }
 
