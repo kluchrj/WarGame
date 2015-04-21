@@ -39,7 +39,7 @@ namespace WarGUI
                 WarWorker.CancelAsync();
         }
 
-        // UI Buttons
+        // UI
         //----------------------------------------------------------------------------------------------------------
 
         private void btn_start_Click(object sender, EventArgs e)
@@ -93,7 +93,7 @@ namespace WarGUI
             lbox_log.Items.Clear();
         }
 
-        // Start when we press enter inside boxes
+        // Start simulating when we press enter
         private void num_iterations_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)
@@ -118,6 +118,13 @@ namespace WarGUI
             }
         }
 
+        void LogMessage(String Msg)
+        {
+            DateTime now = DateTime.Now;
+            lbox_log.Items.Add(String.Format("[{0}] {1}", now, Msg));
+            lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
+        }
+
         // Worker functions
         //----------------------------------------------------------------------------------------------------------
 
@@ -129,22 +136,26 @@ namespace WarGUI
             // Record When we last updated the UI
             DateTime LastUpdated = DateTime.Now;
 
+            // Create decks for each player, plus a deck to draw cards from
             List<Deck> CardDeck = new List<Deck>();
             Queue<Deck> PlayerDeck = new Queue<Deck>();
             Queue<Deck> ComputerDeck = new Queue<Deck>();
 
+            // Get the number of iterations from the argument
             long j = (long)e.Argument;
             long i = 0;
 
-            bool fast = chk_fastshuffle.Checked;
+            bool fastShuffle = chk_fastshuffle.Checked;
             
+            // Add cards to the main deck
             PopulateDeck(CardDeck, chk_jokers.Checked);
 
+            // Create our stats class to store information about this iteration of games
             StatsInfo stat = new StatsInfo(Start);
             
             while (i < j && !WarWorker.CancellationPending)
             {
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fast);
+                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fastShuffle);
                 
                 if (result.GetWiner == Winner.Player)
                 {
@@ -176,9 +187,9 @@ namespace WarGUI
                 ComputerDeck.Clear();
                 i++;
 
-                // The UI thread can lock if we update it too much
+                // Only update the UI every 15ms, or it can lock up
                 TimeSpan diff = DateTime.Now - LastUpdated;
-                if (diff.TotalMilliseconds > 50)
+                if (diff.TotalMilliseconds > 15)
                 {
                     double precentage = ((double)i / (double)j) * 100.0;
                     WarWorker.ReportProgress((int)precentage, i);
@@ -196,7 +207,7 @@ namespace WarGUI
         {   
             lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", e.ProgressPercentage, e.UserState, num_iterations.Value);
 
-            // Don't update progress if we've closed the UI
+            // Don't update the progress bar if we've closed the application
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = (int)e.ProgressPercentage;
         }
@@ -207,7 +218,6 @@ namespace WarGUI
             {
                 StatsInfo result = (StatsInfo)e.Result;
 
-                DateTime end = DateTime.Now;
                 TimeSpan timeDiff = DateTime.Now - result.Time;
 
                 double time = timeDiff.TotalSeconds;
@@ -220,12 +230,13 @@ namespace WarGUI
                 ComputeAverages(result);
             }
             else if (e.Cancelled)
-                LogMessage("Simulation cancelled");
+                LogMessage("Cancelled");
             else
                 LogMessage("Error");
 
             lbl_status.Text = "Ready";
             btn_start.Text = "&Start";
+
             num_iterations.Enabled = true;
             chk_jokers.Enabled = true;
             chk_fastshuffle.Enabled = true;
@@ -234,6 +245,7 @@ namespace WarGUI
                 pbar_progress.Value = 0;
         }
 
+        // Game functions
         //----------------------------------------------------------------------------------------------------------
 
         private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle)
@@ -261,9 +273,11 @@ namespace WarGUI
             {
                 turns++;
 
+                // Grab a card from each player
                 Deck PlayerCard = PlayerDeck.Dequeue();
                 Deck ComputerCard = ComputerDeck.Dequeue();
 
+                // Check to see who's card has a higher value
                 if (PlayerCard.Value > ComputerCard.Value)
                 {
                     PlayerDeck.Enqueue(PlayerCard);
@@ -294,11 +308,11 @@ namespace WarGUI
 
         void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
         {
-            // If a player runs out of cards they loose
+            // If a player runs out of cards they loose the tie, and the game
             if (PlayerDeck.Count == 0 || ComDeck.Count == 0)
                 return;
 
-            // Each player puts down 2 cards, and reveals a third
+            // In a tie, each player should put down 3 cards and reveal the last
             if (PlayerDeck.Count > 2 && ComDeck.Count > 2)
             {
                 TempDeck.Add(PlayerDeck.Dequeue());
@@ -328,7 +342,7 @@ namespace WarGUI
                 ComDeck.Enqueue(PlayerCard);
                 CombineDecks(ComDeck, TempDeck);
             }
-            else // tie
+            else // tie (again)
             {
                 TempDeck.Add(ComputerCard);
                 TempDeck.Add(PlayerCard);
@@ -351,13 +365,19 @@ namespace WarGUI
             }
         }
 
-        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck)
+        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealPlayerFirst = true)
         {
             for (int i = 0; i < CardDeck.Count; i++)
                 if (i % 2 == 0)
-                    PlayerDeck.Enqueue(CardDeck[i]);
+                    if (DealPlayerFirst)
+                        PlayerDeck.Enqueue(CardDeck[i]);
+                    else
+                        ComDeck.Enqueue(CardDeck[i]);
                 else
-                    ComDeck.Enqueue(CardDeck[i]);
+                    if (DealPlayerFirst)
+                        ComDeck.Enqueue(CardDeck[i]);
+                    else
+                        PlayerDeck.Enqueue(CardDeck[i]);
         }
 
         void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
@@ -366,11 +386,11 @@ namespace WarGUI
                 Deck.Enqueue(c);
         }
 
+        // Stats
         //----------------------------------------------------------------------------------------------------------
 
         void ComputeAverages(StatsInfo stats)
         {
-            // Compute numbers
             PlayerWins += stats.PlayerWins;
             ComputerWins += stats.ComputerWins;
             Draws += stats.Draws;
@@ -411,13 +431,6 @@ namespace WarGUI
             double avgturns = Turns / Total;
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-        }
-
-        void LogMessage(String Msg)
-        {
-            DateTime now = DateTime.Now;
-            lbox_log.Items.Add(String.Format("[{0}] {1}", now, Msg));
-            lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
         }
     }
 }

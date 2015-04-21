@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace WarGUI
 {
     /// <summary>
-    /// stores info about a set of games including
+    /// Stores the following info about a set of games:
     ///     Player / Computer wins and Draws
     ///     Predictions based on card weight
     ///     Start time of the operation
@@ -68,17 +68,6 @@ namespace WarGUI
         public StatsInfo(DateTime time)
         {
             Start = time;
-
-            playerwins = 0;
-            computerwins = 0;
-            draws = 0;
-            correctpred = 0;
-            incorrectpred = 0;
-
-            weightedtoplayer = 0;
-            weightedtocomputer = 0;
-
-            turns = 0;
         }
     }
 }

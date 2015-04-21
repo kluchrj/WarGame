@@ -141,7 +141,7 @@
             this.lbox_log.Location = new System.Drawing.Point(6, 19);
             this.lbox_log.Name = "lbox_log";
             this.lbox_log.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.lbox_log.Size = new System.Drawing.Size(429, 277);
+            this.lbox_log.Size = new System.Drawing.Size(409, 277);
             this.lbox_log.TabIndex = 6;
             this.lbox_log.TabStop = false;
             // 
@@ -150,7 +150,7 @@
             this.gbox_log.Controls.Add(this.lbox_log);
             this.gbox_log.Location = new System.Drawing.Point(12, 41);
             this.gbox_log.Name = "gbox_log";
-            this.gbox_log.Size = new System.Drawing.Size(441, 306);
+            this.gbox_log.Size = new System.Drawing.Size(421, 306);
             this.gbox_log.TabIndex = 7;
             this.gbox_log.TabStop = false;
             this.gbox_log.Text = "Log";
@@ -178,7 +178,7 @@
             this.lbl_cwin_val.Location = new System.Drawing.Point(94, 19);
             this.lbl_cwin_val.Name = "lbl_cwin_val";
             this.lbl_cwin_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_cwin_val.Size = new System.Drawing.Size(115, 13);
+            this.lbl_cwin_val.Size = new System.Drawing.Size(135, 13);
             this.lbl_cwin_val.TabIndex = 1;
             this.lbl_cwin_val.Text = "0 (0%)";
             this.lbl_cwin_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -198,7 +198,7 @@
             this.lbl_pwins_val.Location = new System.Drawing.Point(94, 32);
             this.lbl_pwins_val.Name = "lbl_pwins_val";
             this.lbl_pwins_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_pwins_val.Size = new System.Drawing.Size(115, 13);
+            this.lbl_pwins_val.Size = new System.Drawing.Size(135, 13);
             this.lbl_pwins_val.TabIndex = 3;
             this.lbl_pwins_val.Text = "0 (0%)";
             this.lbl_pwins_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -218,7 +218,7 @@
             this.lbl_draws_val.Location = new System.Drawing.Point(94, 45);
             this.lbl_draws_val.Name = "lbl_draws_val";
             this.lbl_draws_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_draws_val.Size = new System.Drawing.Size(115, 13);
+            this.lbl_draws_val.Size = new System.Drawing.Size(135, 13);
             this.lbl_draws_val.TabIndex = 5;
             this.lbl_draws_val.Text = "0 (0%)";
             this.lbl_draws_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -243,9 +243,9 @@
             this.gbox_stats.Controls.Add(this.lbl_cwin_val);
             this.gbox_stats.Controls.Add(this.lbl_pwins);
             this.gbox_stats.Controls.Add(this.lbl_pwins_val);
-            this.gbox_stats.Location = new System.Drawing.Point(459, 41);
+            this.gbox_stats.Location = new System.Drawing.Point(439, 41);
             this.gbox_stats.Name = "gbox_stats";
-            this.gbox_stats.Size = new System.Drawing.Size(215, 306);
+            this.gbox_stats.Size = new System.Drawing.Size(235, 306);
             this.gbox_stats.TabIndex = 10;
             this.gbox_stats.TabStop = false;
             this.gbox_stats.Text = "Stats";
@@ -253,10 +253,10 @@
             // lbl_turns_val
             // 
             this.lbl_turns_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_turns_val.Location = new System.Drawing.Point(125, 130);
+            this.lbl_turns_val.Location = new System.Drawing.Point(110, 130);
             this.lbl_turns_val.Name = "lbl_turns_val";
             this.lbl_turns_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_turns_val.Size = new System.Drawing.Size(84, 13);
+            this.lbl_turns_val.Size = new System.Drawing.Size(119, 13);
             this.lbl_turns_val.TabIndex = 16;
             this.lbl_turns_val.Text = "0";
             this.lbl_turns_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -273,10 +273,10 @@
             // lbl_sims_val
             // 
             this.lbl_sims_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_sims_val.Location = new System.Drawing.Point(125, 117);
+            this.lbl_sims_val.Location = new System.Drawing.Point(110, 117);
             this.lbl_sims_val.Name = "lbl_sims_val";
             this.lbl_sims_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_sims_val.Size = new System.Drawing.Size(84, 13);
+            this.lbl_sims_val.Size = new System.Drawing.Size(119, 13);
             this.lbl_sims_val.TabIndex = 14;
             this.lbl_sims_val.Text = "0";
             this.lbl_sims_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -292,9 +292,9 @@
             // 
             // btn_clearlog
             // 
-            this.btn_clearlog.Location = new System.Drawing.Point(108, 273);
+            this.btn_clearlog.Location = new System.Drawing.Point(119, 273);
             this.btn_clearlog.Name = "btn_clearlog";
-            this.btn_clearlog.Size = new System.Drawing.Size(101, 23);
+            this.btn_clearlog.Size = new System.Drawing.Size(110, 23);
             this.btn_clearlog.TabIndex = 5;
             this.btn_clearlog.Text = "Clear &Log";
             this.btn_clearlog.UseVisualStyleBackColor = true;
@@ -302,9 +302,9 @@
             // 
             // btn_clear
             // 
-            this.btn_clear.Location = new System.Drawing.Point(6, 273);
+            this.btn_clear.Location = new System.Drawing.Point(9, 273);
             this.btn_clear.Name = "btn_clear";
-            this.btn_clear.Size = new System.Drawing.Size(101, 23);
+            this.btn_clear.Size = new System.Drawing.Size(110, 23);
             this.btn_clear.TabIndex = 4;
             this.btn_clear.Text = "&Clear Stats";
             this.btn_clear.UseVisualStyleBackColor = true;
@@ -313,10 +313,10 @@
             // lbl_winnerweight_val
             // 
             this.lbl_winnerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_winnerweight_val.Location = new System.Drawing.Point(125, 95);
+            this.lbl_winnerweight_val.Location = new System.Drawing.Point(128, 95);
             this.lbl_winnerweight_val.Name = "lbl_winnerweight_val";
             this.lbl_winnerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_winnerweight_val.Size = new System.Drawing.Size(84, 13);
+            this.lbl_winnerweight_val.Size = new System.Drawing.Size(101, 13);
             this.lbl_winnerweight_val.TabIndex = 11;
             this.lbl_winnerweight_val.Text = "0 (0%)";
             this.lbl_winnerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -333,10 +333,10 @@
             // lbl_playerweight_val
             // 
             this.lbl_playerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_playerweight_val.Location = new System.Drawing.Point(125, 82);
+            this.lbl_playerweight_val.Location = new System.Drawing.Point(128, 82);
             this.lbl_playerweight_val.Name = "lbl_playerweight_val";
             this.lbl_playerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_playerweight_val.Size = new System.Drawing.Size(84, 13);
+            this.lbl_playerweight_val.Size = new System.Drawing.Size(101, 13);
             this.lbl_playerweight_val.TabIndex = 9;
             this.lbl_playerweight_val.Text = "0 (0%)";
             this.lbl_playerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -353,10 +353,10 @@
             // lbl_compweight_val
             // 
             this.lbl_compweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_compweight_val.Location = new System.Drawing.Point(125, 69);
+            this.lbl_compweight_val.Location = new System.Drawing.Point(128, 69);
             this.lbl_compweight_val.Name = "lbl_compweight_val";
             this.lbl_compweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_compweight_val.Size = new System.Drawing.Size(84, 13);
+            this.lbl_compweight_val.Size = new System.Drawing.Size(101, 13);
             this.lbl_compweight_val.TabIndex = 7;
             this.lbl_compweight_val.Text = "0 (0%)";
             this.lbl_compweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;

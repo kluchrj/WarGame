@@ -9,7 +9,7 @@ namespace WarGUI
     public enum Winner { Player, Computer, Draw }
 
     /// <summary>
-    /// stores info about a single game of war including
+    /// Stores the following info about a single game of war:
     ///     the winner
     ///     the card weight of the computer and player
     ///     the ammount of turns taken
