@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace WarGUI
 {
@@ -30,6 +32,14 @@ namespace WarGUI
             InitializeComponent();
 
             num_iterations.Maximum = long.MaxValue;
+
+            cb_dealfirst.Items.Add("Player");
+            cb_dealfirst.Items.Add("Computer");
+            cb_dealfirst.Items.Add("Every Other");
+            cb_dealfirst.Items.Add("Random");
+
+            // Select every other by default
+            cb_dealfirst.SelectedIndex = 2;
         }
 
         private void War_FormClosing(object sender, FormClosingEventArgs e)
@@ -49,6 +59,7 @@ namespace WarGUI
                 btn_start.Text = "&Stop";
 
                 num_iterations.Enabled = false;
+                cb_dealfirst.Enabled = false;
                 chk_jokers.Enabled = false;
                 chk_fastshuffle.Enabled = false;
 
@@ -59,7 +70,32 @@ namespace WarGUI
 
                 long i = (long)num_iterations.Value;
 
-                WarWorker.RunWorkerAsync(i);
+                // Create array of arugments to pass
+                List<object> Arguments = new List<object>();
+
+                // Add number of iterations
+                Arguments.Add(i);
+
+                // Add who to deal first
+                int dealFirst;
+                    // 0 - Deal player first
+                    // 1 - Deal computer first
+                    // 2 - Deal every other
+                    // 3 - Deal randomly
+
+                if (cb_dealfirst.SelectedIndex == 0) // Player
+                    dealFirst = 0;
+                else if (cb_dealfirst.SelectedIndex == 1) // Computer
+                    dealFirst = 1;
+                else if (cb_dealfirst.SelectedIndex == 2) // Every other
+                    dealFirst = 2;
+                else // Random
+                    dealFirst = 3;
+
+                Arguments.Add(dealFirst);
+                Arguments.Add(chk_fastshuffle.Checked);
+
+                WarWorker.RunWorkerAsync(Arguments);
             }
             else
             {
@@ -74,16 +110,18 @@ namespace WarGUI
             PlayerAvg = PlayerWins = 0;
             CorrectPred = IncorrectPred = 0;
             WeightedToComputer = WeightedToPlayer = 0;
+            Turns = 0;
 
             lbl_cwin_val.Text = "0 (0%)";
             lbl_pwins_val.Text = "0 (0%)";
             lbl_draws_val.Text = "0 (0%)";
 
-            lbl_compweight_val.Text = "0 (0%)";
-            lbl_playerweight_val.Text = "0 (0%)";
+            lbl_compweight_val.Text = "0";
+            lbl_playerweight_val.Text = "0";
             lbl_winnerweight_val.Text = "0 (0%)";
 
             lbl_sims_val.Text = "0";
+            lbl_turns_val.Text = "0";
 
             LogMessage("Stats cleared");
         }
@@ -97,25 +135,25 @@ namespace WarGUI
         private void num_iterations_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)
-            {
                 btn_start_Click(sender, e);
-            }
         }
 
         private void chk_jokers_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)
-            {
                 btn_start_Click(sender, e);
-            }
         }
 
         private void chk_fastshuffle_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)
-            {
                 btn_start_Click(sender, e);
-            }
+        }
+
+        private void cb_dealfirst_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+                btn_start_Click(sender, e);
         }
 
         void LogMessage(String Msg)
@@ -134,18 +172,29 @@ namespace WarGUI
             DateTime Start = DateTime.Now;
 
             // Record When we last updated the UI
-            DateTime LastUpdated = DateTime.Now;
+            Stopwatch LastUpdated = new Stopwatch();
+            LastUpdated.Start();
 
             // Create decks for each player, plus a deck to draw cards from
             List<Deck> CardDeck = new List<Deck>();
             Queue<Deck> PlayerDeck = new Queue<Deck>();
             Queue<Deck> ComputerDeck = new Queue<Deck>();
 
+            // Get the arguments array
+            List<object> Args = (List<object>)e.Argument;
+
             // Get the number of iterations from the argument
-            long j = (long)e.Argument;
+            long j = (long)Args[0];
             long i = 0;
 
-            bool fastShuffle = chk_fastshuffle.Checked;
+            // Choose who to deal cards to first
+            int dealFirst = (int)Args[1];
+            bool deal = false;
+
+            Random rand = new Random();
+
+            // Store if we want faster randomness
+            bool fastShuffle = (bool)Args[2];
             
             // Add cards to the main deck
             PopulateDeck(CardDeck, chk_jokers.Checked);
@@ -155,7 +204,14 @@ namespace WarGUI
             
             while (i < j && !WarWorker.CancellationPending)
             {
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fastShuffle);
+                if (dealFirst == 2)
+                    deal = !deal;
+                else if (dealFirst == 3)
+                    deal = Convert.ToBoolean(rand.Next(0, 2));
+                else
+                    deal = Convert.ToBoolean(dealFirst);
+
+                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fastShuffle, deal);
                 
                 if (result.GetWiner == Winner.Player)
                 {
@@ -187,15 +243,16 @@ namespace WarGUI
                 ComputerDeck.Clear();
                 i++;
 
-                // Only update the UI every 15ms, or it can lock up
-                TimeSpan diff = DateTime.Now - LastUpdated;
-                if (diff.TotalMilliseconds > 15)
+                // Only update the UI every so often (15ms), or it can lock up
+                if (LastUpdated.ElapsedMilliseconds > 15)
                 {
                     double precentage = ((double)i / (double)j) * 100.0;
                     WarWorker.ReportProgress((int)precentage, i);
-                    LastUpdated = DateTime.Now;
+                    LastUpdated.Restart();
                 }
             }
+
+            LastUpdated.Stop();
 
             if (WarWorker.CancellationPending)
                 e.Cancel = true;
@@ -207,7 +264,7 @@ namespace WarGUI
         {   
             lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", e.ProgressPercentage, e.UserState, num_iterations.Value);
 
-            // Don't update the progress bar if we've closed the application
+            // Don't update the progress bar if the application closed
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = (int)e.ProgressPercentage;
         }
@@ -216,8 +273,10 @@ namespace WarGUI
         {
             if (!e.Cancelled && e.Error == null)
             {
+                // Grab results
                 StatsInfo result = (StatsInfo)e.Result;
 
+                // Get the elapsed time
                 TimeSpan timeDiff = DateTime.Now - result.Time;
 
                 double time = timeDiff.TotalSeconds;
@@ -227,7 +286,7 @@ namespace WarGUI
                 else
                     LogMessage(String.Format("Completed in {0:0} ms", timeDiff.TotalMilliseconds));
 
-                ComputeAverages(result);
+                UpdateStats(result);
             }
             else if (e.Cancelled)
                 LogMessage("Cancelled");
@@ -238,6 +297,7 @@ namespace WarGUI
             btn_start.Text = "&Start";
 
             num_iterations.Enabled = true;
+            cb_dealfirst.Enabled = true;
             chk_jokers.Enabled = true;
             chk_fastshuffle.Enabled = true;
 
@@ -248,23 +308,23 @@ namespace WarGUI
         // Game functions
         //----------------------------------------------------------------------------------------------------------
 
-        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle)
+        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
         {
             if (FastShuffle)
                 CardDeck.FastShuffle();
             else
                 CardDeck.Shuffle();
 
-            DealCards(PlayerDeck, ComputerDeck, CardDeck);
+            DealCards(PlayerDeck, ComputerDeck, CardDeck, DealFirst);
 
             // Calculate hand weight for each player
             int PlayerWeight = 0, ComputerWeight = 0;
 
             foreach (Deck c in PlayerDeck)
-                PlayerWeight += c.Value;
+                PlayerWeight += c.Value - 8;
 
             foreach (Deck c in ComputerDeck)
-                ComputerWeight += c.Value;
+                ComputerWeight += c.Value - 8;
 
             // Main game loop
             int turns = 0;
@@ -300,10 +360,10 @@ namespace WarGUI
 
             if (PlayerDeck.Count == 0 && ComputerDeck.Count == 0) // There was a tie for every card!
                 return new GameInfo(Winner.Draw, ComputerWeight, PlayerWeight, turns);
-            else if (PlayerDeck.Count == 0)
-                return new GameInfo(Winner.Computer, ComputerWeight, PlayerWeight, turns);
-            else
+            else if (ComputerDeck.Count == 0)
                 return new GameInfo(Winner.Player, ComputerWeight, PlayerWeight, turns);
+            else
+                return new GameInfo(Winner.Computer, ComputerWeight, PlayerWeight, turns);
         }
 
         void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
@@ -315,19 +375,19 @@ namespace WarGUI
             // In a tie, each player should put down 3 cards and reveal the last
             if (PlayerDeck.Count > 2 && ComDeck.Count > 2)
             {
+                TempDeck.Add(PlayerDeck.Dequeue()); // 3
                 TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(ComDeck.Dequeue());
+                TempDeck.Add(ComDeck.Dequeue()); // 2
                 TempDeck.Add(ComDeck.Dequeue());
             }
             else if (PlayerDeck.Count > 1 && ComDeck.Count > 1)
             {
-                // if a player has less than 2 cards, don't put down 3
-                TempDeck.Add(PlayerDeck.Dequeue());
+                // if a player has less than 3 cards, but more than one, put only 2 down
+                TempDeck.Add(PlayerDeck.Dequeue()); // 2
                 TempDeck.Add(ComDeck.Dequeue());
             }
 
-            Deck PlayerCard = PlayerDeck.Dequeue();
+            Deck PlayerCard = PlayerDeck.Dequeue(); // 1 
             Deck ComputerCard = ComDeck.Dequeue();
 
             if (PlayerCard.Value > ComputerCard.Value)
@@ -365,19 +425,25 @@ namespace WarGUI
             }
         }
 
-        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealPlayerFirst = true)
+        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst = true)
         {
             for (int i = 0; i < CardDeck.Count; i++)
+            {
                 if (i % 2 == 0)
-                    if (DealPlayerFirst)
-                        PlayerDeck.Enqueue(CardDeck[i]);
-                    else
+                {
+                    if (DealComputerFirst)
                         ComDeck.Enqueue(CardDeck[i]);
+                    else
+                        PlayerDeck.Enqueue(CardDeck[i]);
+                }
                 else
-                    if (DealPlayerFirst)
-                        ComDeck.Enqueue(CardDeck[i]);
-                    else
+                {
+                    if (DealComputerFirst)
                         PlayerDeck.Enqueue(CardDeck[i]);
+                    else
+                        ComDeck.Enqueue(CardDeck[i]);
+                }
+            }
         }
 
         void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
@@ -389,7 +455,7 @@ namespace WarGUI
         // Stats
         //----------------------------------------------------------------------------------------------------------
 
-        void ComputeAverages(StatsInfo stats)
+        void UpdateStats(StatsInfo stats)
         {
             PlayerWins += stats.PlayerWins;
             ComputerWins += stats.ComputerWins;
@@ -420,8 +486,8 @@ namespace WarGUI
             
             if (WeightedToComputer > 0 && WeightedToPlayer > 0)
             {
-                lbl_compweight_val.Text = String.Format("{0} ({1:0.#}%)", WeightedToComputer, WeightedToComputer / Total * 100.0);
-                lbl_playerweight_val.Text = String.Format("{0} ({1:0.#}%)", WeightedToPlayer, WeightedToPlayer / Total * 100);
+                lbl_compweight_val.Text = String.Format("{0:0.##}", WeightedToComputer / Total);
+                lbl_playerweight_val.Text = String.Format("{0:0.##}", WeightedToPlayer / Total);
                 lbl_winnerweight_val.Text = String.Format("{0} ({1:0.#}%)", CorrectPred, PredictAvg);
             }
 

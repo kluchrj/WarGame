@@ -5,8 +5,8 @@ using System.Text;
 
 namespace WarGUI
 {
-    public enum CardSuits { Clubs, Diamonds, Hearts, Spades }
-    public enum CardNames { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King }
+    public enum CardSuits { Spades, Diamonds, Clubs, Hearts }
+    public enum CardNames { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
     public abstract class Deck
     {

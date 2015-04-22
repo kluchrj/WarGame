@@ -58,6 +58,8 @@
             this.lbl_compweight = new System.Windows.Forms.Label();
             this.chk_jokers = new System.Windows.Forms.CheckBox();
             this.chk_fastshuffle = new System.Windows.Forms.CheckBox();
+            this.lbl_dealfirst = new System.Windows.Forms.Label();
+            this.cb_dealfirst = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.gbox_log.SuspendLayout();
@@ -295,7 +297,7 @@
             this.btn_clearlog.Location = new System.Drawing.Point(119, 273);
             this.btn_clearlog.Name = "btn_clearlog";
             this.btn_clearlog.Size = new System.Drawing.Size(110, 23);
-            this.btn_clearlog.TabIndex = 5;
+            this.btn_clearlog.TabIndex = 6;
             this.btn_clearlog.Text = "Clear &Log";
             this.btn_clearlog.UseVisualStyleBackColor = true;
             this.btn_clearlog.Click += new System.EventHandler(this.btn_clearlog_Click);
@@ -305,7 +307,7 @@
             this.btn_clear.Location = new System.Drawing.Point(9, 273);
             this.btn_clear.Name = "btn_clear";
             this.btn_clear.Size = new System.Drawing.Size(110, 23);
-            this.btn_clear.TabIndex = 4;
+            this.btn_clear.TabIndex = 5;
             this.btn_clear.Text = "&Clear Stats";
             this.btn_clear.UseVisualStyleBackColor = true;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
@@ -313,10 +315,10 @@
             // lbl_winnerweight_val
             // 
             this.lbl_winnerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_winnerweight_val.Location = new System.Drawing.Point(128, 95);
+            this.lbl_winnerweight_val.Location = new System.Drawing.Point(110, 95);
             this.lbl_winnerweight_val.Name = "lbl_winnerweight_val";
             this.lbl_winnerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_winnerweight_val.Size = new System.Drawing.Size(101, 13);
+            this.lbl_winnerweight_val.Size = new System.Drawing.Size(119, 13);
             this.lbl_winnerweight_val.TabIndex = 11;
             this.lbl_winnerweight_val.Text = "0 (0%)";
             this.lbl_winnerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -333,12 +335,12 @@
             // lbl_playerweight_val
             // 
             this.lbl_playerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_playerweight_val.Location = new System.Drawing.Point(128, 82);
+            this.lbl_playerweight_val.Location = new System.Drawing.Point(110, 82);
             this.lbl_playerweight_val.Name = "lbl_playerweight_val";
             this.lbl_playerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_playerweight_val.Size = new System.Drawing.Size(101, 13);
+            this.lbl_playerweight_val.Size = new System.Drawing.Size(119, 13);
             this.lbl_playerweight_val.TabIndex = 9;
-            this.lbl_playerweight_val.Text = "0 (0%)";
+            this.lbl_playerweight_val.Text = "0";
             this.lbl_playerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lbl_playerweight
@@ -346,19 +348,19 @@
             this.lbl_playerweight.AutoSize = true;
             this.lbl_playerweight.Location = new System.Drawing.Point(6, 82);
             this.lbl_playerweight.Name = "lbl_playerweight";
-            this.lbl_playerweight.Size = new System.Drawing.Size(100, 13);
+            this.lbl_playerweight.Size = new System.Drawing.Size(98, 13);
             this.lbl_playerweight.TabIndex = 8;
-            this.lbl_playerweight.Text = "Weighted to Player:";
+            this.lbl_playerweight.Text = "Avg Player Weight:";
             // 
             // lbl_compweight_val
             // 
             this.lbl_compweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_compweight_val.Location = new System.Drawing.Point(128, 69);
+            this.lbl_compweight_val.Location = new System.Drawing.Point(110, 69);
             this.lbl_compweight_val.Name = "lbl_compweight_val";
             this.lbl_compweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_compweight_val.Size = new System.Drawing.Size(101, 13);
+            this.lbl_compweight_val.Size = new System.Drawing.Size(119, 13);
             this.lbl_compweight_val.TabIndex = 7;
-            this.lbl_compweight_val.Text = "0 (0%)";
+            this.lbl_compweight_val.Text = "0";
             this.lbl_compweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lbl_compweight
@@ -366,17 +368,17 @@
             this.lbl_compweight.AutoSize = true;
             this.lbl_compweight.Location = new System.Drawing.Point(6, 69);
             this.lbl_compweight.Name = "lbl_compweight";
-            this.lbl_compweight.Size = new System.Drawing.Size(116, 13);
+            this.lbl_compweight.Size = new System.Drawing.Size(96, 13);
             this.lbl_compweight.TabIndex = 6;
-            this.lbl_compweight.Text = "Weighted to Computer:";
+            this.lbl_compweight.Text = "Avg Comp Weight:";
             // 
             // chk_jokers
             // 
             this.chk_jokers.AutoSize = true;
-            this.chk_jokers.Location = new System.Drawing.Point(282, 18);
+            this.chk_jokers.Location = new System.Drawing.Point(448, 16);
             this.chk_jokers.Name = "chk_jokers";
             this.chk_jokers.Size = new System.Drawing.Size(57, 17);
-            this.chk_jokers.TabIndex = 2;
+            this.chk_jokers.TabIndex = 3;
             this.chk_jokers.Text = "&Jokers";
             this.chk_jokers.UseVisualStyleBackColor = true;
             this.chk_jokers.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.chk_jokers_KeyPress);
@@ -384,19 +386,41 @@
             // chk_fastshuffle
             // 
             this.chk_fastshuffle.AutoSize = true;
-            this.chk_fastshuffle.Location = new System.Drawing.Point(345, 18);
+            this.chk_fastshuffle.Location = new System.Drawing.Point(511, 16);
             this.chk_fastshuffle.Name = "chk_fastshuffle";
-            this.chk_fastshuffle.Size = new System.Drawing.Size(82, 17);
-            this.chk_fastshuffle.TabIndex = 3;
-            this.chk_fastshuffle.Text = "&Fast Shuffle";
+            this.chk_fastshuffle.Size = new System.Drawing.Size(73, 17);
+            this.chk_fastshuffle.TabIndex = 4;
+            this.chk_fastshuffle.Tag = "";
+            this.chk_fastshuffle.Text = "&Fast RNG";
             this.chk_fastshuffle.UseVisualStyleBackColor = true;
             this.chk_fastshuffle.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.chk_fastshuffle_KeyPress);
+            // 
+            // lbl_dealfirst
+            // 
+            this.lbl_dealfirst.AutoSize = true;
+            this.lbl_dealfirst.Location = new System.Drawing.Point(273, 17);
+            this.lbl_dealfirst.Name = "lbl_dealfirst";
+            this.lbl_dealfirst.Size = new System.Drawing.Size(51, 13);
+            this.lbl_dealfirst.TabIndex = 12;
+            this.lbl_dealfirst.Text = "Deal First";
+            // 
+            // cb_dealfirst
+            // 
+            this.cb_dealfirst.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_dealfirst.FormattingEnabled = true;
+            this.cb_dealfirst.Location = new System.Drawing.Point(330, 14);
+            this.cb_dealfirst.Name = "cb_dealfirst";
+            this.cb_dealfirst.Size = new System.Drawing.Size(103, 21);
+            this.cb_dealfirst.TabIndex = 2;
+            this.cb_dealfirst.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cb_dealfirst_KeyPress);
             // 
             // War
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 372);
+            this.Controls.Add(this.cb_dealfirst);
+            this.Controls.Add(this.lbl_dealfirst);
             this.Controls.Add(this.chk_fastshuffle);
             this.Controls.Add(this.chk_jokers);
             this.Controls.Add(this.gbox_log);
@@ -453,6 +477,8 @@
         private System.Windows.Forms.Label lbl_turns;
         private System.Windows.Forms.CheckBox chk_jokers;
         private System.Windows.Forms.CheckBox chk_fastshuffle;
+        private System.Windows.Forms.Label lbl_dealfirst;
+        private System.Windows.Forms.ComboBox cb_dealfirst;
     }
 }
 
