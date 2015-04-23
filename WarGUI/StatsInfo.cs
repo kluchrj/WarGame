@@ -11,6 +11,7 @@ namespace WarGUI
     ///     Player / Computer wins and Draws
     ///     Predictions based on card weight
     ///     Start time of the operation
+    ///     Weights of the player and computer
     /// </summary>
     class StatsInfo
     {
@@ -20,8 +21,8 @@ namespace WarGUI
         private int correctpred;
         private int incorrectpred;
 
-        private int weightedtoplayer;
-        private int weightedtocomputer;
+        private int playerweight;
+        private int computerweight;
 
         private double turns;
 
@@ -47,13 +48,13 @@ namespace WarGUI
             get { return incorrectpred; }
             set { incorrectpred = value; }
         }
-        public int WeightedToPlayer {
-            get { return weightedtoplayer; }
-            set { weightedtoplayer = value; }
+        public int PlayerWeight {
+            get { return playerweight; }
+            set { playerweight = value; }
         }
-        public int WeightedToComputer {
-            get { return weightedtocomputer; }
-            set { weightedtocomputer = value; }
+        public int ComputerWeight {
+            get { return computerweight; }
+            set { computerweight = value; }
         }
 
         public DateTime Time {

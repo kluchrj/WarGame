@@ -22,8 +22,8 @@ namespace WarGUI
         private double DrawAvg;
         private double PredictAvg;
 
-        private int WeightedToPlayer;
-        private int WeightedToComputer;
+        private int PlayerWeight;
+        private int ComputerWeight;
 
         private double Turns;
 
@@ -83,17 +83,18 @@ namespace WarGUI
                     // 2 - Deal every other
                     // 3 - Deal randomly
 
-                if (cb_dealfirst.SelectedIndex == 0) // Player
+                if (cb_dealfirst.SelectedIndex == 0)
                     dealFirst = 0;
-                else if (cb_dealfirst.SelectedIndex == 1) // Computer
+                else if (cb_dealfirst.SelectedIndex == 1)
                     dealFirst = 1;
-                else if (cb_dealfirst.SelectedIndex == 2) // Every other
+                else if (cb_dealfirst.SelectedIndex == 2)
                     dealFirst = 2;
-                else // Random
+                else
                     dealFirst = 3;
 
                 Arguments.Add(dealFirst);
                 Arguments.Add(chk_fastshuffle.Checked);
+                Arguments.Add(chk_jokers.Checked);
 
                 WarWorker.RunWorkerAsync(Arguments);
             }
@@ -109,7 +110,7 @@ namespace WarGUI
             ComputerAvg = ComputerWins = Draws = 0;
             PlayerAvg = PlayerWins = 0;
             CorrectPred = IncorrectPred = 0;
-            WeightedToComputer = WeightedToPlayer = 0;
+            ComputerWeight = PlayerWeight = 0;
             Turns = 0;
 
             lbl_cwin_val.Text = "0 (0%)";
@@ -192,18 +193,16 @@ namespace WarGUI
             bool deal = false;
 
             Random rand = new Random();
-
-            // Store if we want faster randomness
-            bool fastShuffle = (bool)Args[2];
             
             // Add cards to the main deck
-            PopulateDeck(CardDeck, chk_jokers.Checked);
+            PopulateDeck(CardDeck, (bool)Args[3]);
 
             // Create our stats class to store information about this iteration of games
             StatsInfo stat = new StatsInfo(Start);
             
             while (i < j && !WarWorker.CancellationPending)
             {
+                // Get who to deal first
                 if (dealFirst == 2)
                     deal = !deal;
                 else if (dealFirst == 3)
@@ -211,7 +210,7 @@ namespace WarGUI
                 else
                     deal = Convert.ToBoolean(dealFirst);
 
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, fastShuffle, deal);
+                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
                 
                 if (result.GetWiner == Winner.Player)
                 {
@@ -232,10 +231,8 @@ namespace WarGUI
                 else
                     stat.Draws++;
 
-                if (result.PlayerWeight > result.ComputerWeight)
-                    stat.WeightedToPlayer++;
-                else if (result.ComputerWeight > result.PlayerWeight)
-                    stat.WeightedToComputer++;
+                stat.ComputerWeight += result.ComputerWeight;
+                stat.PlayerWeight += result.PlayerWeight;
 
                 stat.Turns += (double)result.Turns;
 
@@ -412,7 +409,7 @@ namespace WarGUI
             }
         }
 
-        void PopulateDeck(List<Deck> Cards, bool Joker)
+        void PopulateDeck(List<Deck> Cards, bool Joker = false)
         {
             foreach (CardSuits suit in Enum.GetValues(typeof(CardSuits)))
                 foreach (CardNames name in Enum.GetValues(typeof(CardNames)))
@@ -461,8 +458,8 @@ namespace WarGUI
             ComputerWins += stats.ComputerWins;
             Draws += stats.Draws;
 
-            WeightedToComputer += stats.WeightedToComputer;
-            WeightedToPlayer += stats.WeightedToPlayer;
+            ComputerWeight += stats.ComputerWeight;
+            PlayerWeight += stats.PlayerWeight;
 
             CorrectPred += stats.CorrectPred;
             IncorrectPred += stats.IncorrectPred;
@@ -480,17 +477,14 @@ namespace WarGUI
             PredictAvg = CorrectPred / Total * 100.0;
 
             // Update labels
-            lbl_cwin_val.Text = String.Format("{0} ({1:0.##}%)", ComputerWins, ComputerAvg);
-            lbl_pwins_val.Text = String.Format("{0} ({1:0.##}%)", PlayerWins, PlayerAvg);
+            lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", ComputerWins, ComputerAvg);
+            lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", PlayerWins, PlayerAvg);
             lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", Draws, DrawAvg);
             
-            if (WeightedToComputer > 0 && WeightedToPlayer > 0)
-            {
-                lbl_compweight_val.Text = String.Format("{0:0.##}", WeightedToComputer / Total);
-                lbl_playerweight_val.Text = String.Format("{0:0.##}", WeightedToPlayer / Total);
-                lbl_winnerweight_val.Text = String.Format("{0} ({1:0.#}%)", CorrectPred, PredictAvg);
-            }
-
+            lbl_compweight_val.Text = String.Format("{0:0.##}", ComputerWeight / Total);
+            lbl_playerweight_val.Text = String.Format("{0:0.##}", PlayerWeight / Total);
+            lbl_winnerweight_val.Text = String.Format("{0} ({1:0.#}%)", CorrectPred, PredictAvg);
+            
             lbl_sims_val.Text = String.Format("{0}", Total);
 
             Turns += stats.Turns;
