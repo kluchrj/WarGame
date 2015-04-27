@@ -315,12 +315,12 @@
             // lbl_winnerweight_val
             // 
             this.lbl_winnerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_winnerweight_val.Location = new System.Drawing.Point(110, 95);
+            this.lbl_winnerweight_val.Location = new System.Drawing.Point(119, 95);
             this.lbl_winnerweight_val.Name = "lbl_winnerweight_val";
             this.lbl_winnerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_winnerweight_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_winnerweight_val.Size = new System.Drawing.Size(110, 13);
             this.lbl_winnerweight_val.TabIndex = 11;
-            this.lbl_winnerweight_val.Text = "0 (0%)";
+            this.lbl_winnerweight_val.Text = "0%";
             this.lbl_winnerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lbl_winnerweight
@@ -328,9 +328,9 @@
             this.lbl_winnerweight.AutoSize = true;
             this.lbl_winnerweight.Location = new System.Drawing.Point(6, 95);
             this.lbl_winnerweight.Name = "lbl_winnerweight";
-            this.lbl_winnerweight.Size = new System.Drawing.Size(99, 13);
+            this.lbl_winnerweight.Size = new System.Drawing.Size(111, 13);
             this.lbl_winnerweight.TabIndex = 10;
-            this.lbl_winnerweight.Text = "Correct Predictions:";
+            this.lbl_winnerweight.Text = "Higher Weight Win %:";
             // 
             // lbl_playerweight_val
             // 

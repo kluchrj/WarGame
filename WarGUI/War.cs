@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace WarGUI
 {
@@ -73,28 +72,10 @@ namespace WarGUI
                 // Create array of arugments to pass
                 List<object> Arguments = new List<object>();
 
-                // Add number of iterations
-                Arguments.Add(i);
-
-                // Add who to deal first
-                int dealFirst;
-                    // 0 - Deal player first
-                    // 1 - Deal computer first
-                    // 2 - Deal every other
-                    // 3 - Deal randomly
-
-                if (cb_dealfirst.SelectedIndex == 0)
-                    dealFirst = 0;
-                else if (cb_dealfirst.SelectedIndex == 1)
-                    dealFirst = 1;
-                else if (cb_dealfirst.SelectedIndex == 2)
-                    dealFirst = 2;
-                else
-                    dealFirst = 3;
-
-                Arguments.Add(dealFirst);
-                Arguments.Add(chk_fastshuffle.Checked);
-                Arguments.Add(chk_jokers.Checked);
+                Arguments.Add(i);                           // Iterations
+                Arguments.Add(cb_dealfirst.SelectedIndex);  // Deal first
+                Arguments.Add(chk_fastshuffle.Checked);     // Fast shuffle
+                Arguments.Add(chk_jokers.Checked);          // Jokers
 
                 WarWorker.RunWorkerAsync(Arguments);
             }
@@ -119,7 +100,7 @@ namespace WarGUI
 
             lbl_compweight_val.Text = "0";
             lbl_playerweight_val.Text = "0";
-            lbl_winnerweight_val.Text = "0 (0%)";
+            lbl_winnerweight_val.Text = "0%";
 
             lbl_sims_val.Text = "0";
             lbl_turns_val.Text = "0";
@@ -159,8 +140,7 @@ namespace WarGUI
 
         void LogMessage(String Msg)
         {
-            DateTime now = DateTime.Now;
-            lbox_log.Items.Add(String.Format("[{0}] {1}", now, Msg));
+            lbox_log.Items.Add(String.Format("[{0}] {1}", DateTime.Now, Msg));
             lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
         }
 
@@ -188,9 +168,9 @@ namespace WarGUI
             long j = (long)Args[0];
             long i = 0;
 
-            // Choose who to deal cards to first
+            // Pick who to deal cards to first
             int dealFirst = (int)Args[1];
-            bool deal = false;
+            bool deal = Convert.ToBoolean(dealFirst);
 
             Random rand = new Random();
             
@@ -202,13 +182,11 @@ namespace WarGUI
             
             while (i < j && !WarWorker.CancellationPending)
             {
-                // Get who to deal first
+                // Determine who to deal if random or every other was choosen
                 if (dealFirst == 2)
                     deal = !deal;
                 else if (dealFirst == 3)
                     deal = Convert.ToBoolean(rand.Next(0, 2));
-                else
-                    deal = Convert.ToBoolean(dealFirst);
 
                 GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
                 
@@ -261,7 +239,7 @@ namespace WarGUI
         {   
             lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", e.ProgressPercentage, e.UserState, num_iterations.Value);
 
-            // Don't update the progress bar if the application closed
+            // Don't update if the application closed
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = (int)e.ProgressPercentage;
         }
@@ -323,8 +301,11 @@ namespace WarGUI
             foreach (Deck c in ComputerDeck)
                 ComputerWeight += c.Value - 8;
 
+            // Create temporary deck to store cards in
+            List<Deck> Temp = new List<Deck>();
+
             // Main game loop
-            int turns = 0;
+            long turns = 0;
 
             while (PlayerDeck.Count > 0 && ComputerDeck.Count > 0)
             {
@@ -334,25 +315,20 @@ namespace WarGUI
                 Deck PlayerCard = PlayerDeck.Dequeue();
                 Deck ComputerCard = ComputerDeck.Dequeue();
 
+                Temp.Add(PlayerCard);
+                Temp.Add(ComputerCard);
+
                 // Check to see who's card has a higher value
                 if (PlayerCard.Value > ComputerCard.Value)
-                {
-                    PlayerDeck.Enqueue(PlayerCard);
-                    PlayerDeck.Enqueue(ComputerCard);
-                }
-                else if (ComputerCard.Value > PlayerCard.Value)
-                {
-                    ComputerDeck.Enqueue(ComputerCard);
-                    ComputerDeck.Enqueue(PlayerCard);
-                }
-                else // tie
-                {
-                    List<Deck> Temp = new List<Deck>();
-                    Temp.Add(ComputerCard);
-                    Temp.Add(PlayerCard);
+                    CombineDecks(PlayerDeck, Temp);
 
+                else if (ComputerCard.Value > PlayerCard.Value)
+                    CombineDecks(ComputerDeck, Temp);
+
+                else // tie
                     TieBreaker(PlayerDeck, ComputerDeck, Temp);
-                }
+
+                Temp.Clear();
             }
 
             if (PlayerDeck.Count == 0 && ComputerDeck.Count == 0) // There was a tie for every card!
@@ -365,48 +341,39 @@ namespace WarGUI
 
         void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
         {
-            // If a player runs out of cards they loose the tie, and the game
+            // If a player runs out of cards they loose the tie (and the game)
             if (PlayerDeck.Count == 0 || ComDeck.Count == 0)
                 return;
 
             // In a tie, each player should put down 3 cards and reveal the last
             if (PlayerDeck.Count > 2 && ComDeck.Count > 2)
             {
-                TempDeck.Add(PlayerDeck.Dequeue()); // 3
                 TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(ComDeck.Dequeue()); // 2
+                TempDeck.Add(PlayerDeck.Dequeue());
+                TempDeck.Add(ComDeck.Dequeue());
                 TempDeck.Add(ComDeck.Dequeue());
             }
             else if (PlayerDeck.Count > 1 && ComDeck.Count > 1)
             {
                 // if a player has less than 3 cards, but more than one, put only 2 down
-                TempDeck.Add(PlayerDeck.Dequeue()); // 2
+                TempDeck.Add(PlayerDeck.Dequeue());
                 TempDeck.Add(ComDeck.Dequeue());
             }
 
-            Deck PlayerCard = PlayerDeck.Dequeue(); // 1 
+            Deck PlayerCard = PlayerDeck.Dequeue();
             Deck ComputerCard = ComDeck.Dequeue();
 
-            if (PlayerCard.Value > ComputerCard.Value)
-            {
-                PlayerDeck.Enqueue(PlayerCard);
-                PlayerDeck.Enqueue(ComputerCard);
-                CombineDecks(PlayerDeck, TempDeck);
-            }
-            else if (ComputerCard.Value > PlayerCard.Value)
-            {
-                ComDeck.Enqueue(ComputerCard);
-                ComDeck.Enqueue(PlayerCard);
-                CombineDecks(ComDeck, TempDeck);
-            }
-            else // tie (again)
-            {
-                TempDeck.Add(ComputerCard);
-                TempDeck.Add(PlayerCard);
+            TempDeck.Add(PlayerCard);
+            TempDeck.Add(ComputerCard);
 
-                // Recurse until there is a looser
-                TieBreaker(PlayerDeck, ComDeck, TempDeck);
-            }
+            if (PlayerCard.Value > ComputerCard.Value)
+                CombineDecks(PlayerDeck, TempDeck);
+
+            else if (ComputerCard.Value > PlayerCard.Value)
+                CombineDecks(ComDeck, TempDeck);
+
+            else // tie (again)
+                TieBreaker(PlayerDeck, ComDeck, TempDeck); // Recurse until there is a looser
         }
 
         void PopulateDeck(List<Deck> Cards, bool Joker = false)
@@ -422,7 +389,7 @@ namespace WarGUI
             }
         }
 
-        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst = true)
+        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst)
         {
             for (int i = 0; i < CardDeck.Count; i++)
             {
@@ -445,6 +412,9 @@ namespace WarGUI
 
         void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
         {
+            // Shuffle the input deck to prevent ENDLESS WAR(!) or biased results
+            ToAdd.FastShuffle();
+
             foreach (Deck c in ToAdd)
                 Deck.Enqueue(c);
         }
@@ -483,7 +453,7 @@ namespace WarGUI
             
             lbl_compweight_val.Text = String.Format("{0:0.##}", ComputerWeight / Total);
             lbl_playerweight_val.Text = String.Format("{0:0.##}", PlayerWeight / Total);
-            lbl_winnerweight_val.Text = String.Format("{0} ({1:0.#}%)", CorrectPred, PredictAvg);
+            lbl_winnerweight_val.Text = String.Format("{0:0.#}%", PredictAvg);
             
             lbl_sims_val.Text = String.Format("{0}", Total);
 
