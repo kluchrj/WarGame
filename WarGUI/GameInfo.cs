@@ -19,7 +19,7 @@ namespace WarGUI
         private Winner Victor;
         private int CWeight;
         private int PWeight;
-        private long turns;
+        private ulong turns;
 
         public Winner GetWiner
         {
@@ -36,12 +36,12 @@ namespace WarGUI
             get { return PWeight; }
         }
 
-        public long Turns
+        public ulong Turns
         {
             get { return turns; }
         }
 
-        public GameInfo(Winner victor, int ComputerWeight, int PlayerWeight, long NumTurns)
+        public GameInfo(Winner victor, int ComputerWeight, int PlayerWeight, ulong NumTurns)
         {
             Victor = victor;
             CWeight = ComputerWeight;

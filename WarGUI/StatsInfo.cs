@@ -19,7 +19,6 @@ namespace WarGUI
         private int computerwins;
         private int draws;
         private int correctpred;
-        private int incorrectpred;
 
         private int playerweight;
         private int computerweight;
@@ -43,10 +42,6 @@ namespace WarGUI
         public int CorrectPred {
             get { return correctpred; }
             set { correctpred = value; }
-        }
-        public int IncorrectPred {
-            get { return incorrectpred; }
-            set { incorrectpred = value; }
         }
         public int PlayerWeight {
             get { return playerweight; }

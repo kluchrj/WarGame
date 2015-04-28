@@ -14,7 +14,6 @@ namespace WarGUI
         private int ComputerWins;
         private int Draws;
         private int CorrectPred;
-        private int IncorrectPred;
 
         private double PlayerAvg;
         private double ComputerAvg;
@@ -25,6 +24,8 @@ namespace WarGUI
         private int ComputerWeight;
 
         private double Turns;
+
+        private TimeSpan gameTime;
 
         public War()
         {
@@ -90,9 +91,10 @@ namespace WarGUI
         {
             ComputerAvg = ComputerWins = Draws = 0;
             PlayerAvg = PlayerWins = 0;
-            CorrectPred = IncorrectPred = 0;
+            CorrectPred = 0;
             ComputerWeight = PlayerWeight = 0;
             Turns = 0;
+            gameTime = TimeSpan.Zero;
 
             lbl_cwin_val.Text = "0 (0%)";
             lbl_pwins_val.Text = "0 (0%)";
@@ -104,6 +106,8 @@ namespace WarGUI
 
             lbl_sims_val.Text = "0";
             lbl_turns_val.Text = "0";
+
+            lbl_gametime_val.Text = "0 μs";
 
             LogMessage("Stats cleared");
         }
@@ -195,16 +199,12 @@ namespace WarGUI
                     stat.PlayerWins++;
                     if (result.PlayerWeight > result.ComputerWeight)
                         stat.CorrectPred++;
-                    else
-                        stat.IncorrectPred++;
                 }
                 else if (result.GetWiner == Winner.Computer)
                 {
                     stat.ComputerWins++;
                     if (result.ComputerWeight > result.PlayerWeight)
                         stat.CorrectPred++;
-                    else
-                        stat.IncorrectPred++;
                 }
                 else
                     stat.Draws++;
@@ -256,6 +256,8 @@ namespace WarGUI
 
                 double time = timeDiff.TotalSeconds;
 
+                gameTime += timeDiff;
+
                 if (time > 1.0)
                     LogMessage(String.Format("Completed in {0:0.#} seconds", time));
                 else
@@ -305,7 +307,7 @@ namespace WarGUI
             List<Deck> Temp = new List<Deck>();
 
             // Main game loop
-            long turns = 0;
+            ulong turns = 0;
 
             while (PlayerDeck.Count > 0 && ComputerDeck.Count > 0)
             {
@@ -432,7 +434,6 @@ namespace WarGUI
             PlayerWeight += stats.PlayerWeight;
 
             CorrectPred += stats.CorrectPred;
-            IncorrectPred += stats.IncorrectPred;
 
             double Total = PlayerWins + ComputerWins + Draws;
 
@@ -443,7 +444,6 @@ namespace WarGUI
             ComputerAvg = ComputerWins / Total * 100.0;
             DrawAvg = Draws / Total * 100.0;
 
-            Total = CorrectPred + IncorrectPred;
             PredictAvg = CorrectPred / Total * 100.0;
 
             // Update labels
@@ -461,6 +461,8 @@ namespace WarGUI
             double avgturns = Turns / Total;
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
+
+            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / Total);
         }
     }
 }

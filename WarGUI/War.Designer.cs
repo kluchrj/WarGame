@@ -60,6 +60,8 @@
             this.chk_fastshuffle = new System.Windows.Forms.CheckBox();
             this.lbl_dealfirst = new System.Windows.Forms.Label();
             this.cb_dealfirst = new System.Windows.Forms.ComboBox();
+            this.lbl_gametime_val = new System.Windows.Forms.Label();
+            this.lbl_gametime = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.gbox_log.SuspendLayout();
@@ -227,6 +229,8 @@
             // 
             // gbox_stats
             // 
+            this.gbox_stats.Controls.Add(this.lbl_gametime_val);
+            this.gbox_stats.Controls.Add(this.lbl_gametime);
             this.gbox_stats.Controls.Add(this.lbl_turns_val);
             this.gbox_stats.Controls.Add(this.lbl_turns);
             this.gbox_stats.Controls.Add(this.lbl_sims_val);
@@ -255,7 +259,7 @@
             // lbl_turns_val
             // 
             this.lbl_turns_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_turns_val.Location = new System.Drawing.Point(110, 130);
+            this.lbl_turns_val.Location = new System.Drawing.Point(110, 139);
             this.lbl_turns_val.Name = "lbl_turns_val";
             this.lbl_turns_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.lbl_turns_val.Size = new System.Drawing.Size(119, 13);
@@ -266,7 +270,7 @@
             // lbl_turns
             // 
             this.lbl_turns.AutoSize = true;
-            this.lbl_turns.Location = new System.Drawing.Point(6, 130);
+            this.lbl_turns.Location = new System.Drawing.Point(6, 139);
             this.lbl_turns.Name = "lbl_turns";
             this.lbl_turns.Size = new System.Drawing.Size(98, 13);
             this.lbl_turns.TabIndex = 15;
@@ -414,6 +418,26 @@
             this.cb_dealfirst.TabIndex = 2;
             this.cb_dealfirst.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cb_dealfirst_KeyPress);
             // 
+            // lbl_gametime_val
+            // 
+            this.lbl_gametime_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lbl_gametime_val.Location = new System.Drawing.Point(110, 152);
+            this.lbl_gametime_val.Name = "lbl_gametime_val";
+            this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.lbl_gametime_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_gametime_val.TabIndex = 18;
+            this.lbl_gametime_val.Text = "0 μs";
+            this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lbl_gametime
+            // 
+            this.lbl_gametime.AutoSize = true;
+            this.lbl_gametime.Location = new System.Drawing.Point(6, 152);
+            this.lbl_gametime.Name = "lbl_gametime";
+            this.lbl_gametime.Size = new System.Drawing.Size(94, 13);
+            this.lbl_gametime.TabIndex = 17;
+            this.lbl_gametime.Text = "Avg Time / Game:";
+            // 
             // War
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -479,6 +503,8 @@
         private System.Windows.Forms.CheckBox chk_fastshuffle;
         private System.Windows.Forms.Label lbl_dealfirst;
         private System.Windows.Forms.ComboBox cb_dealfirst;
+        private System.Windows.Forms.Label lbl_gametime_val;
+        private System.Windows.Forms.Label lbl_gametime;
     }
 }
 
