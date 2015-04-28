@@ -28,8 +28,20 @@ namespace War
             // Set up the Player and Computer's decks
             Queue<Deck> PlayerDeck = new Queue<Deck>();
             Queue<Deck> ComputerDeck = new Queue<Deck>();
+            List<Deck> Temp = new List<Deck>();
 
             DealCards(PlayerDeck, ComputerDeck, CardDeck);
+
+            Console.Write("\nPrint decks? (y/n) ");
+            input = Console.ReadLine();
+
+            if (String.Compare(input, "y", true) == 0)
+            {
+                Console.WriteLine("\n\tPlayer:\t\t\t\tComputer:");
+                Console.WriteLine("\t---------------------------------------------------");
+                PrintDecks<Deck>(PlayerDeck, ComputerDeck);
+                Console.WriteLine();
+            }
 
             // Main game loop
             while (PlayerDeck.Count > 0 && ComputerDeck.Count > 0)
@@ -45,31 +57,28 @@ namespace War
                 Console.WriteLine("Player's Card: {0}", PlayerCard);
                 Console.WriteLine("Computer's Card: {0}", ComputerCard);
 
+                Temp.Add(PlayerCard);
+                Temp.Add(ComputerCard);
+
                 if (PlayerCard.Value > ComputerCard.Value)
                 {
                     Console.WriteLine("\nThe Player takes the hand");
-                    PlayerDeck.Enqueue(PlayerCard);
-                    PlayerDeck.Enqueue(ComputerCard);
+                    CombineDecks(PlayerDeck, Temp);
                 }
                 else if (ComputerCard.Value > PlayerCard.Value)
                 {
                     Console.WriteLine("\nThe Computer takes the hand");
-                    ComputerDeck.Enqueue(ComputerCard);
-                    ComputerDeck.Enqueue(PlayerCard);
+                    CombineDecks(ComputerDeck, Temp);
                 }
                 else
                 {
                     Console.WriteLine("\nTie");
-
-                    List<Deck> Temp = new List<Deck>();
-                    Temp.Add(ComputerCard);
-                    Temp.Add(PlayerCard);
-
                     Console.ReadLine();
 
                     TieBreaker(PlayerDeck, ComputerDeck, Temp);
                 }
 
+                Temp.Clear();
                 Console.ReadLine();
             }
 
@@ -114,13 +123,14 @@ namespace War
             Console.WriteLine("Player's Card: {0}", PlayerCard);
             Console.WriteLine("Computer's Card: {0}", ComputerCard);
 
+            TempDeck.Add(PlayerCard);
+            TempDeck.Add(ComputerCard);
+
             if (PlayerCard.Value > ComputerCard.Value)
             {
                 Console.WriteLine("\nThe Player wins the tie and gets:");
                 PrintList<Deck>(TempDeck);
 
-                PlayerDeck.Enqueue(PlayerCard);
-                PlayerDeck.Enqueue(ComputerCard);
                 CombineDecks(PlayerDeck, TempDeck);
                 return;
             }
@@ -129,18 +139,12 @@ namespace War
                 Console.WriteLine("\nThe Computer wins the tie and gets:");
                 PrintList<Deck>(TempDeck);
 
-                ComDeck.Enqueue(ComputerCard);
-                ComDeck.Enqueue(PlayerCard);
                 CombineDecks(ComDeck, TempDeck);
                 return;
             }
             else
             {
                 Console.WriteLine("\nTie\n");
-
-                TempDeck.Add(ComputerCard);
-                TempDeck.Add(PlayerCard);
-
                 Console.ReadLine();
 
                 // Recurse until there is a looser
@@ -174,6 +178,8 @@ namespace War
 
         static void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
         {
+            ToAdd.Shuffle();
+
             foreach (Deck c in ToAdd)
                 Deck.Enqueue(c);
         }
@@ -182,6 +188,23 @@ namespace War
         {
             foreach (T element in AList)
                 Console.WriteLine("\t{0}", element);
+        }
+
+        static void PrintDecks<T>(Queue<T> AQueue, Queue<T> BQueue)
+        {
+            if (AQueue.Count != BQueue.Count)
+                return;
+
+            for (int i = 0; i < AQueue.Count; i++)
+            {
+                if (AQueue.ElementAt(i).ToString().Length < 6)
+                    Console.Write("\t{0}\t\t", AQueue.ElementAt(i));
+                else if (AQueue.ElementAt(i).ToString().Length < 16)
+                    Console.Write("\t{0}\t", AQueue.ElementAt(i));
+                else
+                    Console.Write("\t{0}", AQueue.ElementAt(i));
+                Console.Write("\t\t{0}\n", BQueue.ElementAt(i));
+            }
         }
     }
 }
