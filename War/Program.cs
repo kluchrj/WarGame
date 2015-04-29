@@ -6,7 +6,7 @@ using System.Text;
 namespace War
 {
     public enum CardSuits { Clubs, Diamonds, Hearts, Spades }
-    public enum CardNames { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King }
+    public enum CardNames { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
     class Program
     {

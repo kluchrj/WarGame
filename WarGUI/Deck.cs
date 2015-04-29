@@ -6,7 +6,7 @@ using System.Text;
 namespace WarGUI
 {
     public enum CardSuits { Spades, Diamonds, Clubs, Hearts }
-    public enum CardNames { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
+    public enum CardNames { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
     public abstract class Deck
     {
@@ -28,48 +28,7 @@ namespace WarGUI
             this.suit = suit;
             this.name = name;
 
-            switch (name)
-            {
-                case CardNames.Two:
-                    value = 2;
-                    break;
-                case CardNames.Three:
-                    value = 3;
-                    break;
-                case CardNames.Four:
-                    value = 4;
-                    break;
-                case CardNames.Five:
-                    value = 5;
-                    break;
-                case CardNames.Six:
-                    value = 6;
-                    break;
-                case CardNames.Seven:
-                    value = 7;
-                    break;
-                case CardNames.Eight:
-                    value = 8;
-                    break;
-                case CardNames.Nine:
-                    value = 9;
-                    break;
-                case CardNames.Ten:
-                    value = 10;
-                    break;
-                case CardNames.Jack:
-                    value = 11;
-                    break;
-                case CardNames.Queen:
-                    value = 12;
-                    break;
-                case CardNames.King:
-                    value = 13;
-                    break;
-                case CardNames.Ace:
-                    value = 14;
-                    break;
-            }
+            value = (int)name;
         }
 
         public override String ToString()
