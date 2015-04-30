@@ -24,8 +24,7 @@ namespace WarGUI
         private int computerweight;
 
         private double turns;
-
-        DateTime Start;
+        private DateTime Start;
 
         public int PlayerWins {
             get { return playerwins; }

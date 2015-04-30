@@ -15,11 +15,6 @@ namespace WarGUI
         private int Draws;
         private int CorrectPred;
 
-        private double PlayerAvg;
-        private double ComputerAvg;
-        private double DrawAvg;
-        private double PredictAvg;
-
         private int PlayerWeight;
         private int ComputerWeight;
 
@@ -89,10 +84,8 @@ namespace WarGUI
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            ComputerAvg = ComputerWins = Draws = 0;
-            PlayerAvg = PlayerWins = 0;
-            CorrectPred = 0;
-            ComputerWeight = PlayerWeight = 0;
+            ComputerWins = PlayerWins = Draws = 0;
+            CorrectPred = ComputerWeight = PlayerWeight = 0;
             Turns = 0;
             gameTime = TimeSpan.Zero;
 
@@ -440,11 +433,14 @@ namespace WarGUI
             if (Total < 1)
                 return;
             
-            PlayerAvg = PlayerWins / Total * 100.0;
-            ComputerAvg = ComputerWins / Total * 100.0;
-            DrawAvg = Draws / Total * 100.0;
+            double PlayerAvg = PlayerWins / Total * 100.0;
+            double ComputerAvg = ComputerWins / Total * 100.0;
+            double DrawAvg = Draws / Total * 100.0;
 
-            PredictAvg = CorrectPred / Total * 100.0;
+            double PredictAvg = CorrectPred / Total * 100.0;
+
+            Turns += stats.Turns;
+            double avgturns = Turns / Total;
 
             // Update labels
             lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", ComputerWins, ComputerAvg);
@@ -457,11 +453,7 @@ namespace WarGUI
             
             lbl_sims_val.Text = String.Format("{0}", Total);
 
-            Turns += stats.Turns;
-            double avgturns = Turns / Total;
-
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-
             lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / Total);
         }
     }

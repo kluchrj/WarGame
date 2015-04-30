@@ -25,9 +25,7 @@ namespace WarGUI
                 while (!(box[0] < n * (Byte.MaxValue / n)));
                 int k = (box[0] % n);
                 n--;
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                list.Swap(k, n);
             }
         }
 

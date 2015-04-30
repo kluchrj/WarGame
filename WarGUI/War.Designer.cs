@@ -31,7 +31,7 @@
             this.lbl_iterations = new System.Windows.Forms.Label();
             this.btn_start = new System.Windows.Forms.Button();
             this.num_iterations = new System.Windows.Forms.NumericUpDown();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.pbar_progress = new System.Windows.Forms.ToolStripProgressBar();
             this.lbl_status = new System.Windows.Forms.ToolStripStatusLabel();
             this.lbox_log = new System.Windows.Forms.ListBox();
@@ -44,6 +44,8 @@
             this.lbl_draws = new System.Windows.Forms.Label();
             this.lbl_draws_val = new System.Windows.Forms.Label();
             this.gbox_stats = new System.Windows.Forms.GroupBox();
+            this.lbl_gametime_val = new System.Windows.Forms.Label();
+            this.lbl_gametime = new System.Windows.Forms.Label();
             this.lbl_turns_val = new System.Windows.Forms.Label();
             this.lbl_turns = new System.Windows.Forms.Label();
             this.lbl_sims_val = new System.Windows.Forms.Label();
@@ -60,10 +62,8 @@
             this.chk_fastshuffle = new System.Windows.Forms.CheckBox();
             this.lbl_dealfirst = new System.Windows.Forms.Label();
             this.cb_dealfirst = new System.Windows.Forms.ComboBox();
-            this.lbl_gametime_val = new System.Windows.Forms.Label();
-            this.lbl_gametime = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).BeginInit();
-            this.statusStrip1.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.gbox_log.SuspendLayout();
             this.gbox_stats.SuspendLayout();
             this.SuspendLayout();
@@ -96,7 +96,7 @@
             0});
             this.num_iterations.Location = new System.Drawing.Point(149, 15);
             this.num_iterations.Maximum = new decimal(new int[] {
-            1,
+            1000,
             0,
             0,
             0});
@@ -110,23 +110,23 @@
             this.num_iterations.TabIndex = 1;
             this.num_iterations.ThousandsSeparator = true;
             this.num_iterations.Value = new decimal(new int[] {
-            1,
+            1000,
             0,
             0,
             0});
             this.num_iterations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.num_iterations_KeyPress);
             // 
-            // statusStrip1
+            // statusStrip
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pbar_progress,
             this.lbl_status});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 350);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(684, 22);
-            this.statusStrip1.SizingGrip = false;
-            this.statusStrip1.TabIndex = 8;
-            this.statusStrip1.Text = "statusStrip";
+            this.statusStrip.Location = new System.Drawing.Point(0, 350);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(684, 22);
+            this.statusStrip.SizingGrip = false;
+            this.statusStrip.TabIndex = 8;
+            this.statusStrip.Text = "statusStrip";
             // 
             // pbar_progress
             // 
@@ -256,6 +256,26 @@
             this.gbox_stats.TabStop = false;
             this.gbox_stats.Text = "Stats";
             // 
+            // lbl_gametime_val
+            // 
+            this.lbl_gametime_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lbl_gametime_val.Location = new System.Drawing.Point(110, 152);
+            this.lbl_gametime_val.Name = "lbl_gametime_val";
+            this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.lbl_gametime_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_gametime_val.TabIndex = 18;
+            this.lbl_gametime_val.Text = "0 μs";
+            this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lbl_gametime
+            // 
+            this.lbl_gametime.AutoSize = true;
+            this.lbl_gametime.Location = new System.Drawing.Point(6, 152);
+            this.lbl_gametime.Name = "lbl_gametime";
+            this.lbl_gametime.Size = new System.Drawing.Size(94, 13);
+            this.lbl_gametime.TabIndex = 17;
+            this.lbl_gametime.Text = "Avg Time / Game:";
+            // 
             // lbl_turns_val
             // 
             this.lbl_turns_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -319,10 +339,10 @@
             // lbl_winnerweight_val
             // 
             this.lbl_winnerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_winnerweight_val.Location = new System.Drawing.Point(119, 95);
+            this.lbl_winnerweight_val.Location = new System.Drawing.Point(157, 95);
             this.lbl_winnerweight_val.Name = "lbl_winnerweight_val";
             this.lbl_winnerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_winnerweight_val.Size = new System.Drawing.Size(110, 13);
+            this.lbl_winnerweight_val.Size = new System.Drawing.Size(72, 13);
             this.lbl_winnerweight_val.TabIndex = 11;
             this.lbl_winnerweight_val.Text = "0%";
             this.lbl_winnerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -339,10 +359,10 @@
             // lbl_playerweight_val
             // 
             this.lbl_playerweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_playerweight_val.Location = new System.Drawing.Point(110, 82);
+            this.lbl_playerweight_val.Location = new System.Drawing.Point(154, 82);
             this.lbl_playerweight_val.Name = "lbl_playerweight_val";
             this.lbl_playerweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_playerweight_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_playerweight_val.Size = new System.Drawing.Size(75, 13);
             this.lbl_playerweight_val.TabIndex = 9;
             this.lbl_playerweight_val.Text = "0";
             this.lbl_playerweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -359,10 +379,10 @@
             // lbl_compweight_val
             // 
             this.lbl_compweight_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_compweight_val.Location = new System.Drawing.Point(110, 69);
+            this.lbl_compweight_val.Location = new System.Drawing.Point(157, 69);
             this.lbl_compweight_val.Name = "lbl_compweight_val";
             this.lbl_compweight_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_compweight_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_compweight_val.Size = new System.Drawing.Size(72, 13);
             this.lbl_compweight_val.TabIndex = 7;
             this.lbl_compweight_val.Text = "0";
             this.lbl_compweight_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -372,9 +392,9 @@
             this.lbl_compweight.AutoSize = true;
             this.lbl_compweight.Location = new System.Drawing.Point(6, 69);
             this.lbl_compweight.Name = "lbl_compweight";
-            this.lbl_compweight.Size = new System.Drawing.Size(96, 13);
+            this.lbl_compweight.Size = new System.Drawing.Size(114, 13);
             this.lbl_compweight.TabIndex = 6;
-            this.lbl_compweight.Text = "Avg Comp Weight:";
+            this.lbl_compweight.Text = "Avg Computer Weight:";
             // 
             // chk_jokers
             // 
@@ -418,26 +438,6 @@
             this.cb_dealfirst.TabIndex = 2;
             this.cb_dealfirst.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cb_dealfirst_KeyPress);
             // 
-            // lbl_gametime_val
-            // 
-            this.lbl_gametime_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_gametime_val.Location = new System.Drawing.Point(110, 152);
-            this.lbl_gametime_val.Name = "lbl_gametime_val";
-            this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_gametime_val.Size = new System.Drawing.Size(119, 13);
-            this.lbl_gametime_val.TabIndex = 18;
-            this.lbl_gametime_val.Text = "0 μs";
-            this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // lbl_gametime
-            // 
-            this.lbl_gametime.AutoSize = true;
-            this.lbl_gametime.Location = new System.Drawing.Point(6, 152);
-            this.lbl_gametime.Name = "lbl_gametime";
-            this.lbl_gametime.Size = new System.Drawing.Size(94, 13);
-            this.lbl_gametime.TabIndex = 17;
-            this.lbl_gametime.Text = "Avg Time / Game:";
-            // 
             // War
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -448,7 +448,7 @@
             this.Controls.Add(this.chk_fastshuffle);
             this.Controls.Add(this.chk_jokers);
             this.Controls.Add(this.gbox_log);
-            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.num_iterations);
             this.Controls.Add(this.btn_start);
             this.Controls.Add(this.lbl_iterations);
@@ -459,8 +459,8 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "War Simulator";
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.gbox_log.ResumeLayout(false);
             this.gbox_stats.ResumeLayout(false);
             this.gbox_stats.PerformLayout();
@@ -474,7 +474,7 @@
         private System.Windows.Forms.Label lbl_iterations;
         private System.Windows.Forms.Button btn_start;
         private System.Windows.Forms.NumericUpDown num_iterations;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripProgressBar pbar_progress;
         private System.Windows.Forms.ToolStripStatusLabel lbl_status;
         private System.Windows.Forms.ListBox lbox_log;

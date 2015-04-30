@@ -27,7 +27,6 @@ namespace WarGUI
         {
             this.suit = suit;
             this.name = name;
-
             value = (int)name;
         }
 
@@ -39,17 +38,14 @@ namespace WarGUI
 
     public class Joker : Deck
     {
-        private string name;
-
         public Joker()
         {
-            name = "Joker";
             value = 15;
         }
 
         public override String ToString()
         {
-            return name;
+            return "Joker";
         }
     }
 }
