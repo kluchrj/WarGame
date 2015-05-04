@@ -172,9 +172,9 @@
             this.lbl_cwins.AutoSize = true;
             this.lbl_cwins.Location = new System.Drawing.Point(6, 19);
             this.lbl_cwins.Name = "lbl_cwins";
-            this.lbl_cwins.Size = new System.Drawing.Size(82, 13);
+            this.lbl_cwins.Size = new System.Drawing.Size(79, 13);
             this.lbl_cwins.TabIndex = 0;
-            this.lbl_cwins.Text = "Computer Wins:";
+            this.lbl_cwins.Text = "Computer wins:";
             // 
             // lbl_cwin_val
             // 
@@ -192,9 +192,9 @@
             this.lbl_pwins.AutoSize = true;
             this.lbl_pwins.Location = new System.Drawing.Point(6, 32);
             this.lbl_pwins.Name = "lbl_pwins";
-            this.lbl_pwins.Size = new System.Drawing.Size(66, 13);
+            this.lbl_pwins.Size = new System.Drawing.Size(63, 13);
             this.lbl_pwins.TabIndex = 2;
-            this.lbl_pwins.Text = "Player Wins:";
+            this.lbl_pwins.Text = "Player wins:";
             // 
             // lbl_pwins_val
             // 
@@ -259,10 +259,10 @@
             // lbl_gametime_val
             // 
             this.lbl_gametime_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_gametime_val.Location = new System.Drawing.Point(110, 152);
+            this.lbl_gametime_val.Location = new System.Drawing.Point(157, 152);
             this.lbl_gametime_val.Name = "lbl_gametime_val";
             this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_gametime_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_gametime_val.Size = new System.Drawing.Size(72, 13);
             this.lbl_gametime_val.TabIndex = 18;
             this.lbl_gametime_val.Text = "0 μs";
             this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -272,17 +272,17 @@
             this.lbl_gametime.AutoSize = true;
             this.lbl_gametime.Location = new System.Drawing.Point(6, 152);
             this.lbl_gametime.Name = "lbl_gametime";
-            this.lbl_gametime.Size = new System.Drawing.Size(94, 13);
+            this.lbl_gametime.Size = new System.Drawing.Size(119, 13);
             this.lbl_gametime.TabIndex = 17;
-            this.lbl_gametime.Text = "Avg Time / Game:";
+            this.lbl_gametime.Text = "Average time per game:";
             // 
             // lbl_turns_val
             // 
             this.lbl_turns_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_turns_val.Location = new System.Drawing.Point(110, 139);
+            this.lbl_turns_val.Location = new System.Drawing.Point(157, 139);
             this.lbl_turns_val.Name = "lbl_turns_val";
             this.lbl_turns_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_turns_val.Size = new System.Drawing.Size(119, 13);
+            this.lbl_turns_val.Size = new System.Drawing.Size(72, 13);
             this.lbl_turns_val.TabIndex = 16;
             this.lbl_turns_val.Text = "0";
             this.lbl_turns_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -292,9 +292,9 @@
             this.lbl_turns.AutoSize = true;
             this.lbl_turns.Location = new System.Drawing.Point(6, 139);
             this.lbl_turns.Name = "lbl_turns";
-            this.lbl_turns.Size = new System.Drawing.Size(98, 13);
+            this.lbl_turns.Size = new System.Drawing.Size(123, 13);
             this.lbl_turns.TabIndex = 15;
-            this.lbl_turns.Text = "Avg Turns / Game:";
+            this.lbl_turns.Text = "Average turns per game:";
             // 
             // lbl_sims_val
             // 
@@ -352,9 +352,9 @@
             this.lbl_winnerweight.AutoSize = true;
             this.lbl_winnerweight.Location = new System.Drawing.Point(6, 95);
             this.lbl_winnerweight.Name = "lbl_winnerweight";
-            this.lbl_winnerweight.Size = new System.Drawing.Size(111, 13);
+            this.lbl_winnerweight.Size = new System.Drawing.Size(105, 13);
             this.lbl_winnerweight.TabIndex = 10;
-            this.lbl_winnerweight.Text = "Higher Weight Win %:";
+            this.lbl_winnerweight.Text = "Higher weight win %:";
             // 
             // lbl_playerweight_val
             // 
@@ -372,9 +372,9 @@
             this.lbl_playerweight.AutoSize = true;
             this.lbl_playerweight.Location = new System.Drawing.Point(6, 82);
             this.lbl_playerweight.Name = "lbl_playerweight";
-            this.lbl_playerweight.Size = new System.Drawing.Size(98, 13);
+            this.lbl_playerweight.Size = new System.Drawing.Size(115, 13);
             this.lbl_playerweight.TabIndex = 8;
-            this.lbl_playerweight.Text = "Avg Player Weight:";
+            this.lbl_playerweight.Text = "Average player weight:";
             // 
             // lbl_compweight_val
             // 
@@ -392,9 +392,9 @@
             this.lbl_compweight.AutoSize = true;
             this.lbl_compweight.Location = new System.Drawing.Point(6, 69);
             this.lbl_compweight.Name = "lbl_compweight";
-            this.lbl_compweight.Size = new System.Drawing.Size(114, 13);
+            this.lbl_compweight.Size = new System.Drawing.Size(131, 13);
             this.lbl_compweight.TabIndex = 6;
-            this.lbl_compweight.Text = "Avg Computer Weight:";
+            this.lbl_compweight.Text = "Average computer weight:";
             // 
             // chk_jokers
             // 

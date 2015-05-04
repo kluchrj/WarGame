@@ -7,16 +7,24 @@ using System.Security.Cryptography;
 
 namespace WarGUI
 {
+    public static class ThreadSafeRandom
+    {
+        [ThreadStatic]
+        private static Random Local;
+
+        public static Random ThisThreadsRandom
+        {
+            get { return Local ?? (Local = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
+        }
+    }
     /*
      * Knuth-Fisher-Yates shuffle
      */
     static class MyExtensions
     {
-        static Random rng = new Random();
-        static RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
-
         public static void Shuffle<T>(this IList<T> list)
         {
+            RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
             int n = list.Count;
             while (n > 1)
             {
@@ -29,10 +37,15 @@ namespace WarGUI
             }
         }
 
-        public static void FastShuffle<T>(this IList<T> list)
+        public static void Shuffle<T>(this IList<T> list)
         {
-            for (var i = 0; i < list.Count; i++)
-                list.Swap(i, rng.Next(i, list.Count));
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = ThreadSafeRandom.ThisThreadsRandom.Next(n + 1);
+                list.Swap(k, n);
+            }
         }
 
         public static void Swap<T>(this IList<T> list, int i, int j)
