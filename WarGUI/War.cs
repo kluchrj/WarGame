@@ -27,6 +27,8 @@ namespace WarGUI
             InitializeComponent();
 
             num_iterations.Maximum = long.MaxValue;
+            num_threads.Maximum = Environment.ProcessorCount;
+            num_threads.Value = Environment.ProcessorCount;
 
             cb_dealfirst.Items.Add("Player");
             cb_dealfirst.Items.Add("Computer");
@@ -44,6 +46,7 @@ namespace WarGUI
                 WarWorker.CancelAsync();
         }
 
+        # region UI
         // UI
         //----------------------------------------------------------------------------------------------------------
 
@@ -52,26 +55,24 @@ namespace WarGUI
             if (!WarWorker.IsBusy)
             {
                 btn_start.Text = "&Stop";
+                btn_start.Focus();
 
                 num_iterations.Enabled = false;
                 cb_dealfirst.Enabled = false;
                 chk_jokers.Enabled = false;
                 chk_fastshuffle.Enabled = false;
 
-                btn_start.Focus();
-
                 lbl_status.Text = String.Format("Simulating (0/{0})", num_iterations.Value);
                 LogMessage(String.Format("Simulating {0} games...", num_iterations.Value));
-
-                long i = (long)num_iterations.Value;
 
                 // Create array of arugments to pass
                 List<object> Arguments = new List<object>();
 
-                Arguments.Add(i);                           // Iterations
+                Arguments.Add((long)num_iterations.Value);                           // Iterations
                 Arguments.Add(cb_dealfirst.SelectedIndex);  // Deal first
                 Arguments.Add(chk_fastshuffle.Checked);     // Fast shuffle
                 Arguments.Add(chk_jokers.Checked);          // Jokers
+                Arguments.Add((int)num_threads.Value);      // Number of threads
 
                 WarWorker.RunWorkerAsync(Arguments);
             }
@@ -140,6 +141,7 @@ namespace WarGUI
             lbox_log.Items.Add(String.Format("[{0}] {1}", DateTime.Now, Msg));
             lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
         }
+        # endregion
 
         // Worker functions
         //----------------------------------------------------------------------------------------------------------
@@ -149,83 +151,57 @@ namespace WarGUI
             // Record when the operation started
             DateTime Start = DateTime.Now;
 
-            // Record When we last updated the UI
-            Stopwatch LastUpdated = new Stopwatch();
-            LastUpdated.Start();
-
-            // Create decks for each player, plus a deck to draw cards from
-            List<Deck> CardDeck = new List<Deck>();
-            Queue<Deck> PlayerDeck = new Queue<Deck>();
-            Queue<Deck> ComputerDeck = new Queue<Deck>();
-
             // Get the arguments array
             List<object> Args = (List<object>)e.Argument;
 
-            // Get the number of iterations from the argument
-            long j = (long)Args[0];
-            long i = 0;
+            // Get the number of logical processors
+            int WarCalculations = (int)Args[4];
 
-            // Pick who to deal cards to first
-            int dealFirst = (int)Args[1];
-            bool deal = Convert.ToBoolean(dealFirst);
+            // One event is used for each WarThread object.
+            ManualResetEvent[] doneEvents = new ManualResetEvent[WarCalculations];
+            WarThread[] warArray = new WarThread[WarCalculations];
 
-            Random rand = new Random();
-            
-            // Add cards to the main deck
-            PopulateDeck(CardDeck, (bool)Args[3]);
+            // Distrubute the workload over the threads
+            long[] workload = new long[WarCalculations];
 
-            // Create our stats class to store information about this iteration of games
-            StatsInfo stat = new StatsInfo(Start);
-            
-            while (i < j && !WarWorker.CancellationPending)
+            long total = (long)Args[0];
+            long extra = total % WarCalculations;
+            long perIteration = (total - extra) / WarCalculations;
+
+            for(int i = 0; i < WarCalculations; i++)
             {
-                // Determine who to deal if random or every other was choosen
-                if (dealFirst == 2)
-                    deal = !deal;
-                else if (dealFirst == 3)
-                    deal = Convert.ToBoolean(rand.Next(0, 2));
-
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
-                
-                if (result.GetWiner == Winner.Player)
-                {
-                    stat.PlayerWins++;
-                    if (result.PlayerWeight > result.ComputerWeight)
-                        stat.CorrectPred++;
-                }
-                else if (result.GetWiner == Winner.Computer)
-                {
-                    stat.ComputerWins++;
-                    if (result.ComputerWeight > result.PlayerWeight)
-                        stat.CorrectPred++;
-                }
+                if (i == 0)
+                    workload[i] = perIteration + extra;
                 else
-                    stat.Draws++;
-
-                stat.ComputerWeight += result.ComputerWeight;
-                stat.PlayerWeight += result.PlayerWeight;
-
-                stat.Turns += (double)result.Turns;
-
-                PlayerDeck.Clear();
-                ComputerDeck.Clear();
-                i++;
-
-                // Only update the UI every so often (15ms), or it can lock up
-                if (LastUpdated.ElapsedMilliseconds > 15)
-                {
-                    double precentage = ((double)i / (double)j) * 100.0;
-                    WarWorker.ReportProgress((int)precentage, i);
-                    LastUpdated.Restart();
-                }
+                    workload[i] = perIteration;
             }
 
-            LastUpdated.Stop();
+            // Configure and start threads using ThreadPool
+            Console.WriteLine("launching {0} tasks...", WarCalculations);
+            for (int i = 0; i < WarCalculations; i++)
+            {
+                doneEvents[i] = new ManualResetEvent(false);
+                WarThread f = new WarThread(workload[i], Start, Args, doneEvents[i]);
+                warArray[i] = f;
+                ThreadPool.QueueUserWorkItem(f.ThreadPoolCallback, i);
+            }
+
+            // Wait for all threads in pool to calculate
+            WaitHandle.WaitAll(doneEvents);
+            Console.WriteLine("All calculations are complete.");
+
+            StatsInfo result = new StatsInfo(Start);
+
+            // TODO: Update progress bar
+
+            // Combine the results
+            for (int i = 0; i < WarCalculations; i++)
+                result.AddToStats(warArray[i].Stats);
 
             if (WarWorker.CancellationPending)
                 e.Cancel = true;
 
-            e.Result = stat;
+            e.Result = result;
         }
 
         private void WarWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -273,145 +249,6 @@ namespace WarGUI
 
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = 0;
-        }
-
-        // Game functions
-        //----------------------------------------------------------------------------------------------------------
-
-        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
-        {
-            if (FastShuffle)
-                CardDeck.FastShuffle();
-            else
-                CardDeck.Shuffle();
-
-            DealCards(PlayerDeck, ComputerDeck, CardDeck, DealFirst);
-
-            // Calculate hand weight for each player
-            int PlayerWeight = 0, ComputerWeight = 0;
-
-            foreach (Deck c in PlayerDeck)
-                PlayerWeight += c.Value - 8;
-
-            foreach (Deck c in ComputerDeck)
-                ComputerWeight += c.Value - 8;
-
-            // Create temporary deck to store cards in
-            List<Deck> Temp = new List<Deck>();
-
-            // Main game loop
-            ulong turns = 0;
-
-            while (PlayerDeck.Count > 0 && ComputerDeck.Count > 0)
-            {
-                turns++;
-
-                // Grab a card from each player
-                Deck PlayerCard = PlayerDeck.Dequeue();
-                Deck ComputerCard = ComputerDeck.Dequeue();
-
-                Temp.Add(PlayerCard);
-                Temp.Add(ComputerCard);
-
-                // Check to see who's card has a higher value
-                if (PlayerCard.Value > ComputerCard.Value)
-                    CombineDecks(PlayerDeck, Temp);
-
-                else if (ComputerCard.Value > PlayerCard.Value)
-                    CombineDecks(ComputerDeck, Temp);
-
-                else // tie
-                    TieBreaker(PlayerDeck, ComputerDeck, Temp);
-
-                Temp.Clear();
-            }
-
-            if (PlayerDeck.Count == 0 && ComputerDeck.Count == 0) // There was a tie for every card!
-                return new GameInfo(Winner.Draw, ComputerWeight, PlayerWeight, turns);
-            else if (ComputerDeck.Count == 0)
-                return new GameInfo(Winner.Player, ComputerWeight, PlayerWeight, turns);
-            else
-                return new GameInfo(Winner.Computer, ComputerWeight, PlayerWeight, turns);
-        }
-
-        void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
-        {
-            // If a player runs out of cards they loose the tie (and the game)
-            if (PlayerDeck.Count == 0 || ComDeck.Count == 0)
-                return;
-
-            // In a tie, each player should put down 3 cards and reveal the last
-            if (PlayerDeck.Count > 2 && ComDeck.Count > 2)
-            {
-                TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(ComDeck.Dequeue());
-                TempDeck.Add(ComDeck.Dequeue());
-            }
-            else if (PlayerDeck.Count > 1 && ComDeck.Count > 1)
-            {
-                // if a player has less than 3 cards, but more than one, put only 2 down
-                TempDeck.Add(PlayerDeck.Dequeue());
-                TempDeck.Add(ComDeck.Dequeue());
-            }
-
-            Deck PlayerCard = PlayerDeck.Dequeue();
-            Deck ComputerCard = ComDeck.Dequeue();
-
-            TempDeck.Add(PlayerCard);
-            TempDeck.Add(ComputerCard);
-
-            if (PlayerCard.Value > ComputerCard.Value)
-                CombineDecks(PlayerDeck, TempDeck);
-
-            else if (ComputerCard.Value > PlayerCard.Value)
-                CombineDecks(ComDeck, TempDeck);
-
-            else // tie (again)
-                TieBreaker(PlayerDeck, ComDeck, TempDeck); // Recurse until there is a looser
-        }
-
-        void PopulateDeck(List<Deck> Cards, bool Joker = false)
-        {
-            foreach (CardSuits suit in Enum.GetValues(typeof(CardSuits)))
-                foreach (CardNames name in Enum.GetValues(typeof(CardNames)))
-                    Cards.Add(new Card(suit, name));
-
-            if (Joker)
-            {
-                Cards.Add(new Joker());
-                Cards.Add(new Joker());
-            }
-        }
-
-        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst)
-        {
-            for (int i = 0; i < CardDeck.Count; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    if (DealComputerFirst)
-                        ComDeck.Enqueue(CardDeck[i]);
-                    else
-                        PlayerDeck.Enqueue(CardDeck[i]);
-                }
-                else
-                {
-                    if (DealComputerFirst)
-                        PlayerDeck.Enqueue(CardDeck[i]);
-                    else
-                        ComDeck.Enqueue(CardDeck[i]);
-                }
-            }
-        }
-
-        void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
-        {
-            // Shuffle the input deck to prevent ENDLESS WAR(!) or biased results
-            ToAdd.FastShuffle();
-
-            foreach (Deck c in ToAdd)
-                Deck.Enqueue(c);
         }
 
         // Stats

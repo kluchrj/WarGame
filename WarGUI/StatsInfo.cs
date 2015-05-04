@@ -60,9 +60,22 @@ namespace WarGUI
             set { turns = value; }
         }
 
+        public StatsInfo() { }
+
         public StatsInfo(DateTime time)
         {
             Start = time;
+        }
+
+        public void AddToStats(StatsInfo s)
+        {
+            this.ComputerWeight += s.ComputerWeight;
+            this.ComputerWins += s.ComputerWins;
+            this.CorrectPred += s.CorrectPred;
+            this.Draws += s.Draws;
+            this.PlayerWeight += s.PlayerWeight;
+            this.PlayerWins += s.PlayerWins;
+            this.Turns += s.Turns;
         }
     }
 }
