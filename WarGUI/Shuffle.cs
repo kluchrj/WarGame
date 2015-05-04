@@ -37,7 +37,7 @@ namespace WarGUI
             }
         }
 
-        public static void Shuffle<T>(this IList<T> list)
+        public static void FastShuffle<T>(this IList<T> list)
         {
             int n = list.Count;
             while (n > 1)
