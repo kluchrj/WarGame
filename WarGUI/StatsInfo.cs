@@ -60,6 +60,10 @@ namespace WarGUI
             set { turns = value; }
         }
 
+        public int Total {
+            get { return playerwins + computerwins + draws; }
+        }
+
         public StatsInfo() { }
 
         public StatsInfo(DateTime time)

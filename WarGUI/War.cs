@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -10,25 +11,17 @@ namespace WarGUI
 {
     public partial class War : Form
     {
-        private int PlayerWins;
-        private int ComputerWins;
-        private int Draws;
-        private int CorrectPred;
-
-        private int PlayerWeight;
-        private int ComputerWeight;
-
-        private double Turns;
-
         private TimeSpan gameTime;
+        private StatsInfo OverallStats;
 
         public War()
         {
             InitializeComponent();
 
+            OverallStats = new StatsInfo();
+
             num_iterations.Maximum = long.MaxValue;
-            num_threads.Maximum = Environment.ProcessorCount;
-            num_threads.Value = Environment.ProcessorCount;
+            num_threads.Value = num_threads.Maximum = Environment.ProcessorCount;
 
             cb_dealfirst.Items.Add("Player");
             cb_dealfirst.Items.Add("Computer");
@@ -58,6 +51,7 @@ namespace WarGUI
                 btn_start.Focus();
 
                 num_iterations.Enabled = false;
+                num_threads.Enabled = false;
                 cb_dealfirst.Enabled = false;
                 chk_jokers.Enabled = false;
                 chk_fastshuffle.Enabled = false;
@@ -85,9 +79,7 @@ namespace WarGUI
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            ComputerWins = PlayerWins = Draws = 0;
-            CorrectPred = ComputerWeight = PlayerWeight = 0;
-            Turns = 0;
+            OverallStats = new StatsInfo();
             gameTime = TimeSpan.Zero;
 
             lbl_cwin_val.Text = "0 (0%)";
@@ -151,57 +143,62 @@ namespace WarGUI
             // Record when the operation started
             DateTime Start = DateTime.Now;
 
-            // Get the arguments array
+            // Fetch the arguments array
             List<object> Args = (List<object>)e.Argument;
 
             // Get the number of logical processors
-            int WarCalculations = (int)Args[4];
+            int WarThreads = (int)Args[4];
 
-            // One event is used for each WarThread object.
-            ManualResetEvent[] doneEvents = new ManualResetEvent[WarCalculations];
-            WarThread[] warArray = new WarThread[WarCalculations];
-
-            // Distrubute the workload over the threads
-            long[] workload = new long[WarCalculations];
+            // Calculate the workload for each thread
+            long[] workload = new long[WarThreads];
 
             long total = (long)Args[0];
-            long extra = total % WarCalculations;
-            long perIteration = (total - extra) / WarCalculations;
+            long extra = total % WarThreads;
+            long perIteration = (total - extra) / WarThreads;
 
-            for(int i = 0; i < WarCalculations; i++)
+            for(int i = 0; i < WarThreads; i++)
             {
-                if (i == 0)
-                    workload[i] = perIteration + extra;
+                if (extra > 0)
+                {
+                    workload[i] = perIteration + 1;
+                    extra--;
+                }
                 else
                     workload[i] = perIteration;
             }
 
-            // Configure and start threads using ThreadPool
-            Console.WriteLine("launching {0} tasks...", WarCalculations);
-            for (int i = 0; i < WarCalculations; i++)
+            Parallel.For(0, WarThreads, (i) =>
             {
-                doneEvents[i] = new ManualResetEvent(false);
-                WarThread f = new WarThread(workload[i], Start, Args, doneEvents[i]);
-                warArray[i] = f;
-                ThreadPool.QueueUserWorkItem(f.ThreadPoolCallback, i);
-            }
+                WarThread t = new WarThread(workload[i], Start, Args);
+                t.StartSim();
+                StatsInfo s = t.Stats;
 
-            // Wait for all threads in pool to calculate
-            WaitHandle.WaitAll(doneEvents);
-            Console.WriteLine("All calculations are complete.");
+                // return the result of the game
+                Update(s);
+                return;
+            });
+
 
             StatsInfo result = new StatsInfo(Start);
-
-            // TODO: Update progress bar
-
-            // Combine the results
-            for (int i = 0; i < WarCalculations; i++)
-                result.AddToStats(warArray[i].Stats);
 
             if (WarWorker.CancellationPending)
                 e.Cancel = true;
 
             e.Result = result;
+        }
+
+        void Update(StatsInfo s)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<StatsInfo>(Update), new object[] { s });
+                return;
+            }
+
+            OverallStats.AddToStats(s);
+            LogMessage(s.Total.ToString());
+
+            UpdateStats(OverallStats);
         }
 
         private void WarWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -243,6 +240,7 @@ namespace WarGUI
             btn_start.Text = "&Start";
 
             num_iterations.Enabled = true;
+            num_threads.Enabled = true;
             cb_dealfirst.Enabled = true;
             chk_jokers.Enabled = true;
             chk_fastshuffle.Enabled = true;
@@ -256,42 +254,29 @@ namespace WarGUI
 
         void UpdateStats(StatsInfo stats)
         {
-            PlayerWins += stats.PlayerWins;
-            ComputerWins += stats.ComputerWins;
-            Draws += stats.Draws;
-
-            ComputerWeight += stats.ComputerWeight;
-            PlayerWeight += stats.PlayerWeight;
-
-            CorrectPred += stats.CorrectPred;
-
-            double Total = PlayerWins + ComputerWins + Draws;
-
-            if (Total < 1)
+            if (stats.Total < 1)
                 return;
             
-            double PlayerAvg = PlayerWins / Total * 100.0;
-            double ComputerAvg = ComputerWins / Total * 100.0;
-            double DrawAvg = Draws / Total * 100.0;
+            double PlayerAvg = (double)stats.PlayerWins / stats.Total * 100.0;
+            double ComputerAvg = (double)stats.ComputerWins / stats.Total * 100.0;
+            double DrawAvg = (double)stats.Draws / stats.Total * 100.0;
 
-            double PredictAvg = CorrectPred / Total * 100.0;
-
-            Turns += stats.Turns;
-            double avgturns = Turns / Total;
+            double PredictAvg = (double)stats.CorrectPred / stats.Total * 100.0;
+            double avgturns = stats.Turns / stats.Total;
 
             // Update labels
-            lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", ComputerWins, ComputerAvg);
-            lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", PlayerWins, PlayerAvg);
-            lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", Draws, DrawAvg);
-            
-            lbl_compweight_val.Text = String.Format("{0:0.##}", ComputerWeight / Total);
-            lbl_playerweight_val.Text = String.Format("{0:0.##}", PlayerWeight / Total);
+            lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", stats.ComputerWins, ComputerAvg);
+            lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", stats.PlayerWins, PlayerAvg);
+            lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", stats.Draws, DrawAvg);
+
+            lbl_compweight_val.Text = String.Format("{0:0.##}", (double)stats.ComputerWeight / stats.Total);
+            lbl_playerweight_val.Text = String.Format("{0:0.##}", (double)stats.PlayerWeight / stats.Total);
             lbl_winnerweight_val.Text = String.Format("{0:0.#}%", PredictAvg);
             
-            lbl_sims_val.Text = String.Format("{0}", Total);
+            lbl_sims_val.Text = String.Format("{0}", stats.Total);
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / Total);
+            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / stats.Total);
         }
     }
 }

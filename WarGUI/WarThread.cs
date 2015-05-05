@@ -11,31 +11,19 @@ namespace WarGUI
     {
         private long n;
         private StatsInfo stat;
-        private ManualResetEvent _doneEvent;
         private List<Object> Args;
 
         public long Games { get { return n; } }
         public StatsInfo Stats { get { return stat; } }
 
-        public WarThread(long Games, DateTime Dtime, List<Object> Arguments, ManualResetEvent doneEvent)
+        public WarThread(long Games, DateTime Dtime, List<Object> Arguments)
         {
             n = Games;
             stat = new StatsInfo(Dtime);
             Args = Arguments;
-            _doneEvent = doneEvent;
         }
 
-        // Wrapper method for use with thread pool
-        public void ThreadPoolCallback(Object threadContext)
-        {
-            int threadIndex = (int)threadContext;
-            Console.WriteLine("thread {0} started...", threadIndex);
-            StartSim(n);
-            Console.WriteLine("thread {0} result calculated...", threadIndex);
-            _doneEvent.Set();
-        }
-
-        public void StartSim(long n)
+        public void StartSim()
         {
             // Create decks for each player, plus a deck to draw cards from
             List<Deck> CardDeck = new List<Deck>();
