@@ -15,17 +15,18 @@ namespace WarGUI
     /// </summary>
     class StatsInfo
     {
+        // Variables
         private int playerwins;
         private int computerwins;
         private int draws;
         private int correctpred;
-
         private int playerweight;
         private int computerweight;
 
-        private double turns;
         private DateTime Start;
+        private double turns;
 
+        // Properties
         public int PlayerWins {
             get { return playerwins; }
             set { playerwins = value; }
@@ -50,18 +51,17 @@ namespace WarGUI
             get { return computerweight; }
             set { computerweight = value; }
         }
+        public int Total
+        {
+            get { return playerwins + computerwins + draws; }
+        }
 
         public DateTime Time {
             get { return Start; }
         }
-
         public double Turns {
             get { return turns; }
             set { turns = value; }
-        }
-
-        public int Total {
-            get { return playerwins + computerwins + draws; }
         }
 
         public StatsInfo() { }

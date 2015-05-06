@@ -38,13 +38,6 @@ namespace WarGUI
             cb_dealfirst.SelectedIndex = 2;
         }
 
-        private void War_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Stop the worker thread when the form is closing
-            if (WarWorker.IsBusy)
-                WarWorker.CancelAsync();
-        }
-
         # region UI
         // UI
         //----------------------------------------------------------------------------------------------------------
@@ -68,7 +61,7 @@ namespace WarGUI
                 // Create array of arugments to pass
                 List<object> Arguments = new List<object>();
 
-                Arguments.Add((long)num_iterations.Value);                           // Iterations
+                Arguments.Add((long)num_iterations.Value);  // Iterations
                 Arguments.Add(cb_dealfirst.SelectedIndex);  // Deal first
                 Arguments.Add(chk_fastshuffle.Checked);     // Fast shuffle
                 Arguments.Add(chk_jokers.Checked);          // Jokers
@@ -139,7 +132,16 @@ namespace WarGUI
             lbox_log.Items.Add(String.Format("[{0}] {1}", DateTime.Now, Msg));
             lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
         }
+
+        private void War_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Stop the worker thread when the form is closing
+            if (WarWorker.IsBusy)
+                WarWorker.CancelAsync();
+        }
         # endregion
+
+        #region Worker
 
         // Worker functions
         //----------------------------------------------------------------------------------------------------------
@@ -179,9 +181,9 @@ namespace WarGUI
                     workload[i] = perIteration;
             }
 
+            // Start a parallel loop for each thread
             Parallel.For(0, WarThreads, i =>
             {
-                Console.WriteLine("Thread {0} created", i);
                 StatsInfo stat = new StatsInfo(Start);
 
                 // Create decks for each player, plus a deck to draw cards from
@@ -235,8 +237,9 @@ namespace WarGUI
                         UpdateProgress(100);
                 }
 
-                // return the result of the game
-                Finish(stat);
+                if (!WarWorker.CancellationPending)
+                    Finish(stat);
+
                 return;
             });
 
@@ -277,8 +280,6 @@ namespace WarGUI
             }
 
             OverallStats.AddToStats(s);
-            LogMessage(s.Total.ToString());
-
             UpdateStats(OverallStats);
         }
 
@@ -290,7 +291,6 @@ namespace WarGUI
                 TimeSpan timeDiff = DateTime.Now - OverallStats.Time;
 
                 double time = timeDiff.TotalSeconds;
-
                 gameTime += timeDiff;
 
                 if (time > 1.0)
@@ -320,9 +320,11 @@ namespace WarGUI
                 pbar_progress.Value = 0;
         }
 
-        #region WarFunctions
+        #endregion
 
-        // War Functions
+        #region WarGameFunctions
+
+        // War Game Functions
         //----------------------------------------------------------------------------------------------------------
 
         private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
@@ -463,6 +465,8 @@ namespace WarGUI
 
         #endregion
 
+        #region Stats
+
         // Stats
         //----------------------------------------------------------------------------------------------------------
 
@@ -492,5 +496,7 @@ namespace WarGUI
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
             lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / stats.Total);
         }
+
+        #endregion
     }
 }
