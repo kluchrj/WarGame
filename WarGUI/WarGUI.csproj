@@ -75,7 +75,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shuffle.cs" />
     <Compile Include="StatsInfo.cs" />
-    <Compile Include="WarThread.cs" />
     <EmbeddedResource Include="War.resx">
       <DependentUpon>War.cs</DependentUpon>
     </EmbeddedResource>

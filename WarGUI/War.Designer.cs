@@ -167,7 +167,6 @@
             this.WarWorker.WorkerReportsProgress = true;
             this.WarWorker.WorkerSupportsCancellation = true;
             this.WarWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WarWorker_DoWork);
-            this.WarWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WarWorker_ProgressChanged);
             this.WarWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WarWorker_RunWorkerCompleted);
             // 
             // lbl_cwins

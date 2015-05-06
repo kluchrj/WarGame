@@ -73,6 +73,7 @@ namespace WarGUI
 
         public void AddToStats(StatsInfo s)
         {
+            Start = s.Time;
             this.ComputerWeight += s.ComputerWeight;
             this.ComputerWins += s.ComputerWins;
             this.CorrectPred += s.CorrectPred;
