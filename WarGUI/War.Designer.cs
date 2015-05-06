@@ -62,10 +62,13 @@
             this.chk_fastshuffle = new System.Windows.Forms.CheckBox();
             this.lbl_dealfirst = new System.Windows.Forms.Label();
             this.cb_dealfirst = new System.Windows.Forms.ComboBox();
+            this.num_threads = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.num_iterations)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.gbox_log.SuspendLayout();
             this.gbox_stats.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.num_threads)).BeginInit();
             this.SuspendLayout();
             // 
             // lbl_iterations
@@ -164,7 +167,6 @@
             this.WarWorker.WorkerReportsProgress = true;
             this.WarWorker.WorkerSupportsCancellation = true;
             this.WarWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.WarWorker_DoWork);
-            this.WarWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.WarWorker_ProgressChanged);
             this.WarWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WarWorker_RunWorkerCompleted);
             // 
             // lbl_cwins
@@ -321,17 +323,17 @@
             this.btn_clearlog.Location = new System.Drawing.Point(119, 273);
             this.btn_clearlog.Name = "btn_clearlog";
             this.btn_clearlog.Size = new System.Drawing.Size(110, 23);
-            this.btn_clearlog.TabIndex = 6;
+            this.btn_clearlog.TabIndex = 7;
             this.btn_clearlog.Text = "Clear &Log";
             this.btn_clearlog.UseVisualStyleBackColor = true;
             this.btn_clearlog.Click += new System.EventHandler(this.btn_clearlog_Click);
             // 
             // btn_clear
             // 
-            this.btn_clear.Location = new System.Drawing.Point(9, 273);
+            this.btn_clear.Location = new System.Drawing.Point(6, 273);
             this.btn_clear.Name = "btn_clear";
-            this.btn_clear.Size = new System.Drawing.Size(110, 23);
-            this.btn_clear.TabIndex = 5;
+            this.btn_clear.Size = new System.Drawing.Size(113, 23);
+            this.btn_clear.TabIndex = 6;
             this.btn_clear.Text = "&Clear Stats";
             this.btn_clear.UseVisualStyleBackColor = true;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
@@ -399,10 +401,10 @@
             // chk_jokers
             // 
             this.chk_jokers.AutoSize = true;
-            this.chk_jokers.Location = new System.Drawing.Point(448, 16);
+            this.chk_jokers.Location = new System.Drawing.Point(538, 16);
             this.chk_jokers.Name = "chk_jokers";
             this.chk_jokers.Size = new System.Drawing.Size(57, 17);
-            this.chk_jokers.TabIndex = 3;
+            this.chk_jokers.TabIndex = 4;
             this.chk_jokers.Text = "&Jokers";
             this.chk_jokers.UseVisualStyleBackColor = true;
             this.chk_jokers.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.chk_jokers_KeyPress);
@@ -410,10 +412,10 @@
             // chk_fastshuffle
             // 
             this.chk_fastshuffle.AutoSize = true;
-            this.chk_fastshuffle.Location = new System.Drawing.Point(511, 16);
+            this.chk_fastshuffle.Location = new System.Drawing.Point(601, 16);
             this.chk_fastshuffle.Name = "chk_fastshuffle";
             this.chk_fastshuffle.Size = new System.Drawing.Size(73, 17);
-            this.chk_fastshuffle.TabIndex = 4;
+            this.chk_fastshuffle.TabIndex = 5;
             this.chk_fastshuffle.Tag = "";
             this.chk_fastshuffle.Text = "&Fast RNG";
             this.chk_fastshuffle.UseVisualStyleBackColor = true;
@@ -422,7 +424,7 @@
             // lbl_dealfirst
             // 
             this.lbl_dealfirst.AutoSize = true;
-            this.lbl_dealfirst.Location = new System.Drawing.Point(273, 17);
+            this.lbl_dealfirst.Location = new System.Drawing.Point(363, 17);
             this.lbl_dealfirst.Name = "lbl_dealfirst";
             this.lbl_dealfirst.Size = new System.Drawing.Size(51, 13);
             this.lbl_dealfirst.TabIndex = 12;
@@ -432,18 +434,51 @@
             // 
             this.cb_dealfirst.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cb_dealfirst.FormattingEnabled = true;
-            this.cb_dealfirst.Location = new System.Drawing.Point(330, 14);
+            this.cb_dealfirst.Location = new System.Drawing.Point(420, 14);
             this.cb_dealfirst.Name = "cb_dealfirst";
             this.cb_dealfirst.Size = new System.Drawing.Size(103, 21);
-            this.cb_dealfirst.TabIndex = 2;
+            this.cb_dealfirst.TabIndex = 3;
             this.cb_dealfirst.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cb_dealfirst_KeyPress);
+            // 
+            // num_threads
+            // 
+            this.num_threads.Location = new System.Drawing.Point(321, 15);
+            this.num_threads.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.num_threads.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.num_threads.Name = "num_threads";
+            this.num_threads.Size = new System.Drawing.Size(36, 20);
+            this.num_threads.TabIndex = 2;
+            this.num_threads.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(273, 17);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(46, 13);
+            this.label1.TabIndex = 14;
+            this.label1.Text = "Threads";
             // 
             // War
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 372);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.cb_dealfirst);
+            this.Controls.Add(this.num_threads);
             this.Controls.Add(this.lbl_dealfirst);
             this.Controls.Add(this.chk_fastshuffle);
             this.Controls.Add(this.chk_jokers);
@@ -464,6 +499,7 @@
             this.gbox_log.ResumeLayout(false);
             this.gbox_stats.ResumeLayout(false);
             this.gbox_stats.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.num_threads)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -505,6 +541,8 @@
         private System.Windows.Forms.ComboBox cb_dealfirst;
         private System.Windows.Forms.Label lbl_gametime_val;
         private System.Windows.Forms.Label lbl_gametime;
+        private System.Windows.Forms.NumericUpDown num_threads;
+        private System.Windows.Forms.Label label1;
     }
 }
 

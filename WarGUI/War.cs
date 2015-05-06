@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -10,23 +11,23 @@ namespace WarGUI
 {
     public partial class War : Form
     {
-        private int PlayerWins;
-        private int ComputerWins;
-        private int Draws;
-        private int CorrectPred;
-
-        private int PlayerWeight;
-        private int ComputerWeight;
-
-        private double Turns;
-
         private TimeSpan gameTime;
+        private StatsInfo OverallStats;
+
+        // Keeps track of how often the UI is updated
+        Stopwatch LastUpdated = new Stopwatch();
+
+        // Overall progress for the current operation
+        private long Progress;
 
         public War()
         {
             InitializeComponent();
 
+            OverallStats = new StatsInfo();
+
             num_iterations.Maximum = long.MaxValue;
+            num_threads.Value = num_threads.Maximum = Environment.ProcessorCount;
 
             cb_dealfirst.Items.Add("Player");
             cb_dealfirst.Items.Add("Computer");
@@ -37,13 +38,7 @@ namespace WarGUI
             cb_dealfirst.SelectedIndex = 2;
         }
 
-        private void War_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Stop the worker thread when the form is closing
-            if (WarWorker.IsBusy)
-                WarWorker.CancelAsync();
-        }
-
+        # region UI
         // UI
         //----------------------------------------------------------------------------------------------------------
 
@@ -52,26 +47,25 @@ namespace WarGUI
             if (!WarWorker.IsBusy)
             {
                 btn_start.Text = "&Stop";
+                btn_start.Focus();
 
                 num_iterations.Enabled = false;
+                num_threads.Enabled = false;
                 cb_dealfirst.Enabled = false;
                 chk_jokers.Enabled = false;
                 chk_fastshuffle.Enabled = false;
 
-                btn_start.Focus();
-
                 lbl_status.Text = String.Format("Simulating (0/{0})", num_iterations.Value);
                 LogMessage(String.Format("Simulating {0} games...", num_iterations.Value));
-
-                long i = (long)num_iterations.Value;
 
                 // Create array of arugments to pass
                 List<object> Arguments = new List<object>();
 
-                Arguments.Add(i);                           // Iterations
+                Arguments.Add((long)num_iterations.Value);  // Iterations
                 Arguments.Add(cb_dealfirst.SelectedIndex);  // Deal first
                 Arguments.Add(chk_fastshuffle.Checked);     // Fast shuffle
                 Arguments.Add(chk_jokers.Checked);          // Jokers
+                Arguments.Add((int)num_threads.Value);      // Number of threads
 
                 WarWorker.RunWorkerAsync(Arguments);
             }
@@ -84,9 +78,7 @@ namespace WarGUI
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            ComputerWins = PlayerWins = Draws = 0;
-            CorrectPred = ComputerWeight = PlayerWeight = 0;
-            Turns = 0;
+            OverallStats = new StatsInfo();
             gameTime = TimeSpan.Zero;
 
             lbl_cwin_val.Text = "0 (0%)";
@@ -141,114 +133,164 @@ namespace WarGUI
             lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
         }
 
+        private void War_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Stop the worker thread when the form is closing
+            if (WarWorker.IsBusy)
+                WarWorker.CancelAsync();
+        }
+        # endregion
+
+        #region Worker
+
         // Worker functions
         //----------------------------------------------------------------------------------------------------------
 
         private void WarWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            // Reset progress
+            Progress = 0;
+
+            // Start stopwatch
+            LastUpdated.Start();
+
             // Record when the operation started
             DateTime Start = DateTime.Now;
 
-            // Record When we last updated the UI
-            Stopwatch LastUpdated = new Stopwatch();
-            LastUpdated.Start();
-
-            // Create decks for each player, plus a deck to draw cards from
-            List<Deck> CardDeck = new List<Deck>();
-            Queue<Deck> PlayerDeck = new Queue<Deck>();
-            Queue<Deck> ComputerDeck = new Queue<Deck>();
-
-            // Get the arguments array
+            // Fetch the arguments array
             List<object> Args = (List<object>)e.Argument;
 
-            // Get the number of iterations from the argument
-            long j = (long)Args[0];
-            long i = 0;
+            // Get the number of logical processors
+            int WarThreads = (int)Args[4];
 
-            // Pick who to deal cards to first
-            int dealFirst = (int)Args[1];
-            bool deal = Convert.ToBoolean(dealFirst);
+            // Calculate the workload for each thread
+            long[] workload = new long[WarThreads];
 
-            Random rand = new Random();
-            
-            // Add cards to the main deck
-            PopulateDeck(CardDeck, (bool)Args[3]);
+            long total = (long)Args[0];
+            long extra = total % WarThreads;
+            long perIteration = (total - extra) / WarThreads;
 
-            // Create our stats class to store information about this iteration of games
-            StatsInfo stat = new StatsInfo(Start);
-            
-            while (i < j && !WarWorker.CancellationPending)
+            for(int i = 0; i < WarThreads; i++)
             {
-                // Determine who to deal if random or every other was choosen
-                if (dealFirst == 2)
-                    deal = !deal;
-                else if (dealFirst == 3)
-                    deal = Convert.ToBoolean(rand.Next(0, 2));
-
-                GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
-                
-                if (result.GetWiner == Winner.Player)
+                if (extra > 0)
                 {
-                    stat.PlayerWins++;
-                    if (result.PlayerWeight > result.ComputerWeight)
-                        stat.CorrectPred++;
-                }
-                else if (result.GetWiner == Winner.Computer)
-                {
-                    stat.ComputerWins++;
-                    if (result.ComputerWeight > result.PlayerWeight)
-                        stat.CorrectPred++;
+                    workload[i] = perIteration + 1;
+                    extra--;
                 }
                 else
-                    stat.Draws++;
-
-                stat.ComputerWeight += result.ComputerWeight;
-                stat.PlayerWeight += result.PlayerWeight;
-
-                stat.Turns += (double)result.Turns;
-
-                PlayerDeck.Clear();
-                ComputerDeck.Clear();
-                i++;
-
-                // Only update the UI every so often (15ms), or it can lock up
-                if (LastUpdated.ElapsedMilliseconds > 15)
-                {
-                    double precentage = ((double)i / (double)j) * 100.0;
-                    WarWorker.ReportProgress((int)precentage, i);
-                    LastUpdated.Restart();
-                }
+                    workload[i] = perIteration;
             }
 
-            LastUpdated.Stop();
+            // Start a parallel loop for each thread
+            Parallel.For(0, WarThreads, i =>
+            {
+                StatsInfo stat = new StatsInfo(Start);
+
+                // Create decks for each player, plus a deck to draw cards from
+                List<Deck> CardDeck = new List<Deck>();
+                Queue<Deck> PlayerDeck = new Queue<Deck>();
+                Queue<Deck> ComputerDeck = new Queue<Deck>();
+
+                // Pick who to deal cards to first
+                int dealFirst = (int)Args[1];
+                bool deal = Convert.ToBoolean(dealFirst);
+
+                // Add cards to the main deck
+                PopulateDeck(CardDeck, (bool)Args[3]);
+
+                long j = 0;
+                while (j < workload[i] && !WarWorker.CancellationPending)
+                {
+                    // Determine who to deal if random or every other was choosen
+                    if (dealFirst == 2)
+                        deal = !deal;
+                    else if (dealFirst == 3)
+                        deal = Convert.ToBoolean(ThreadSafeRandom.ThisThreadsRandom.Next(0, 2));
+
+                    GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
+
+                    if (result.GetWiner == Winner.Player)
+                    {
+                        stat.PlayerWins++;
+                        if (result.PlayerWeight > result.ComputerWeight)
+                            stat.CorrectPred++;
+                    }
+                    else if (result.GetWiner == Winner.Computer)
+                    {
+                        stat.ComputerWins++;
+                        if (result.ComputerWeight > result.PlayerWeight)
+                            stat.CorrectPred++;
+                    }
+                    else
+                        stat.Draws++;
+
+                    stat.ComputerWeight += result.ComputerWeight;
+                    stat.PlayerWeight += result.PlayerWeight;
+
+                    stat.Turns += (double)result.Turns;
+
+                    PlayerDeck.Clear();
+                    ComputerDeck.Clear();
+                    j++;
+
+                    if (j % 100 == 0)
+                        UpdateProgress(100);
+                }
+
+                if (!WarWorker.CancellationPending)
+                    Finish(stat);
+
+                return;
+            });
 
             if (WarWorker.CancellationPending)
                 e.Cancel = true;
 
-            e.Result = stat;
+            e.Result = OverallStats;
         }
 
-        private void WarWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {   
-            lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", e.ProgressPercentage, e.UserState, num_iterations.Value);
+        void UpdateProgress(long p)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<long>(UpdateProgress), new object[] { p });
+                return;
+            }
 
-            // Don't update if the application closed
-            if (!pbar_progress.IsDisposed)
-                pbar_progress.Value = (int)e.ProgressPercentage;
+            Progress += p;
+
+            // Only update the UI every so often (15ms), or it can lock up
+            if (LastUpdated.ElapsedMilliseconds < 15)
+                return;
+
+            double _Progress = (double)Progress / (double)num_iterations.Value * 100;
+
+            pbar_progress.Value = (int)_Progress;
+            lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", (int)_Progress, Progress, (int)num_iterations.Value);
+
+            LastUpdated.Restart();
+        }
+
+        void Finish(StatsInfo s)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<StatsInfo>(Finish), new object[] { s });
+                return;
+            }
+
+            OverallStats.AddToStats(s);
+            UpdateStats(OverallStats);
         }
 
         private void WarWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
             {
-                // Grab results
-                StatsInfo result = (StatsInfo)e.Result;
-
                 // Get the elapsed time
-                TimeSpan timeDiff = DateTime.Now - result.Time;
+                TimeSpan timeDiff = DateTime.Now - OverallStats.Time;
 
                 double time = timeDiff.TotalSeconds;
-
                 gameTime += timeDiff;
 
                 if (time > 1.0)
@@ -256,7 +298,7 @@ namespace WarGUI
                 else
                     LogMessage(String.Format("Completed in {0:0} ms", timeDiff.TotalMilliseconds));
 
-                UpdateStats(result);
+                UpdateStats(OverallStats);
             }
             else if (e.Cancelled)
                 LogMessage("Cancelled");
@@ -267,15 +309,22 @@ namespace WarGUI
             btn_start.Text = "&Start";
 
             num_iterations.Enabled = true;
+            num_threads.Enabled = true;
             cb_dealfirst.Enabled = true;
             chk_jokers.Enabled = true;
             chk_fastshuffle.Enabled = true;
+
+            LastUpdated.Stop();
 
             if (!pbar_progress.IsDisposed)
                 pbar_progress.Value = 0;
         }
 
-        // Game functions
+        #endregion
+
+        #region WarGameFunctions
+
+        // War Game Functions
         //----------------------------------------------------------------------------------------------------------
 
         private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
@@ -414,47 +463,40 @@ namespace WarGUI
                 Deck.Enqueue(c);
         }
 
+        #endregion
+
+        #region Stats
+
         // Stats
         //----------------------------------------------------------------------------------------------------------
 
         void UpdateStats(StatsInfo stats)
         {
-            PlayerWins += stats.PlayerWins;
-            ComputerWins += stats.ComputerWins;
-            Draws += stats.Draws;
-
-            ComputerWeight += stats.ComputerWeight;
-            PlayerWeight += stats.PlayerWeight;
-
-            CorrectPred += stats.CorrectPred;
-
-            double Total = PlayerWins + ComputerWins + Draws;
-
-            if (Total < 1)
+            if (stats.Total < 1)
                 return;
             
-            double PlayerAvg = PlayerWins / Total * 100.0;
-            double ComputerAvg = ComputerWins / Total * 100.0;
-            double DrawAvg = Draws / Total * 100.0;
+            double PlayerAvg = (double)stats.PlayerWins / stats.Total * 100.0;
+            double ComputerAvg = (double)stats.ComputerWins / stats.Total * 100.0;
+            double DrawAvg = (double)stats.Draws / stats.Total * 100.0;
 
-            double PredictAvg = CorrectPred / Total * 100.0;
-
-            Turns += stats.Turns;
-            double avgturns = Turns / Total;
+            double PredictAvg = (double)stats.CorrectPred / stats.Total * 100.0;
+            double avgturns = stats.Turns / stats.Total;
 
             // Update labels
-            lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", ComputerWins, ComputerAvg);
-            lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", PlayerWins, PlayerAvg);
-            lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", Draws, DrawAvg);
-            
-            lbl_compweight_val.Text = String.Format("{0:0.##}", ComputerWeight / Total);
-            lbl_playerweight_val.Text = String.Format("{0:0.##}", PlayerWeight / Total);
+            lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", stats.ComputerWins, ComputerAvg);
+            lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", stats.PlayerWins, PlayerAvg);
+            lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", stats.Draws, DrawAvg);
+
+            lbl_compweight_val.Text = String.Format("{0:0.##}", (double)stats.ComputerWeight / stats.Total);
+            lbl_playerweight_val.Text = String.Format("{0:0.##}", (double)stats.PlayerWeight / stats.Total);
             lbl_winnerweight_val.Text = String.Format("{0:0.#}%", PredictAvg);
             
-            lbl_sims_val.Text = String.Format("{0}", Total);
+            lbl_sims_val.Text = String.Format("{0}", stats.Total);
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / Total);
+            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / stats.Total);
         }
+
+        #endregion
     }
 }

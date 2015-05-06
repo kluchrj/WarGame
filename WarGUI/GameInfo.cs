@@ -16,11 +16,13 @@ namespace WarGUI
     /// </summary>
     class GameInfo
     {
+        // Variables
         private Winner Victor;
         private int CWeight;
         private int PWeight;
         private ulong turns;
 
+        // Properties
         public Winner GetWiner
         {
             get { return Victor; }
