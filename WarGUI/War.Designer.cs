@@ -261,12 +261,12 @@
             // lbl_gametime_val
             // 
             this.lbl_gametime_val.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.lbl_gametime_val.Location = new System.Drawing.Point(157, 152);
+            this.lbl_gametime_val.Location = new System.Drawing.Point(131, 152);
             this.lbl_gametime_val.Name = "lbl_gametime_val";
             this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lbl_gametime_val.Size = new System.Drawing.Size(72, 13);
+            this.lbl_gametime_val.Size = new System.Drawing.Size(98, 13);
             this.lbl_gametime_val.TabIndex = 18;
-            this.lbl_gametime_val.Text = "0 ms";
+            this.lbl_gametime_val.Text = "0 µs";
             this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lbl_gametime

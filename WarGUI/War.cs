@@ -93,7 +93,7 @@ namespace WarGUI
             lbl_sims_val.Text = "0";
             lbl_turns_val.Text = "0";
 
-            lbl_gametime_val.Text = "0 ms";
+            lbl_gametime_val.Text = "0 µs";
 
             LogMessage("Stats cleared");
         }
@@ -161,7 +161,7 @@ namespace WarGUI
             // Fetch the arguments array
             List<object> Args = (List<object>)e.Argument;
 
-            // Get the number of logical processors
+            // Get the number of threads
             int WarThreads = (int)Args[4];
 
             // Calculate the workload for each thread
@@ -246,8 +246,6 @@ namespace WarGUI
 
             if (WarWorker.CancellationPending)
                 e.Cancel = true;
-
-            e.Result = OverallStats;
         }
 
         void UpdateProgress(long p)
@@ -289,12 +287,10 @@ namespace WarGUI
             {
                 // Get the elapsed time
                 TimeSpan timeDiff = DateTime.Now - OverallStats.Time;
-
-                double time = timeDiff.TotalSeconds;
                 gameTime += timeDiff;
 
-                if (time > 1.0)
-                    LogMessage(String.Format("Completed in {0:0.#} seconds", time));
+                if (timeDiff.TotalSeconds > 1.0)
+                    LogMessage(String.Format("Completed in {0:0.#} seconds", timeDiff.TotalSeconds));
                 else
                     LogMessage(String.Format("Completed in {0:0} ms", timeDiff.TotalMilliseconds));
 
@@ -494,7 +490,7 @@ namespace WarGUI
             lbl_sims_val.Text = String.Format("{0}", stats.Total);
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-            lbl_gametime_val.Text = String.Format("{0:0} ms", stats.Total / gameTime.TotalMilliseconds);
+            lbl_gametime_val.Text = String.Format("{0:0} µs", gameTime.TotalMilliseconds * 1000 / stats.Total);
         }
 
         #endregion
