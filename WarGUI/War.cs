@@ -110,6 +110,12 @@ namespace WarGUI
                 btn_start_Click(sender, e);
         }
 
+        private void num_threads_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+                btn_start_Click(sender, e);
+        }
+
         private void chk_jokers_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)

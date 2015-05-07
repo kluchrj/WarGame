@@ -461,6 +461,7 @@
             0,
             0,
             0});
+            this.num_threads.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.num_threads_KeyPress);
             // 
             // label1
             // 
