@@ -74,11 +74,11 @@
             // lbl_iterations
             // 
             this.lbl_iterations.AutoSize = true;
-            this.lbl_iterations.Location = new System.Drawing.Point(93, 17);
+            this.lbl_iterations.Location = new System.Drawing.Point(103, 17);
             this.lbl_iterations.Name = "lbl_iterations";
-            this.lbl_iterations.Size = new System.Drawing.Size(50, 13);
+            this.lbl_iterations.Size = new System.Drawing.Size(40, 13);
             this.lbl_iterations.TabIndex = 1;
-            this.lbl_iterations.Text = "Iterations";
+            this.lbl_iterations.Text = "Games";
             // 
             // btn_start
             // 
@@ -266,7 +266,7 @@
             this.lbl_gametime_val.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.lbl_gametime_val.Size = new System.Drawing.Size(72, 13);
             this.lbl_gametime_val.TabIndex = 18;
-            this.lbl_gametime_val.Text = "0 μs";
+            this.lbl_gametime_val.Text = "0 ms";
             this.lbl_gametime_val.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lbl_gametime

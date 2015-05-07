@@ -39,6 +39,7 @@ namespace WarGUI
         }
 
         # region UI
+
         // UI
         //----------------------------------------------------------------------------------------------------------
 
@@ -92,7 +93,7 @@ namespace WarGUI
             lbl_sims_val.Text = "0";
             lbl_turns_val.Text = "0";
 
-            lbl_gametime_val.Text = "0 μs";
+            lbl_gametime_val.Text = "0 ms";
 
             LogMessage("Stats cleared");
         }
@@ -280,7 +281,6 @@ namespace WarGUI
             }
 
             OverallStats.AddToStats(s);
-            UpdateStats(OverallStats);
         }
 
         private void WarWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -494,7 +494,7 @@ namespace WarGUI
             lbl_sims_val.Text = String.Format("{0}", stats.Total);
 
             lbl_turns_val.Text = String.Format("{0:0}", avgturns);
-            lbl_gametime_val.Text = String.Format("{0:0} μs", gameTime.TotalMilliseconds * 1000 / stats.Total);
+            lbl_gametime_val.Text = String.Format("{0:0} ms", stats.Total / gameTime.TotalMilliseconds);
         }
 
         #endregion
