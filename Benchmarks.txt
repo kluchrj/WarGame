@@ -2,23 +2,23 @@ i7-3540M @ 3.00GHz, 2 Core(s), 4 Logical Processor(s)
 
 100,00 Games
 
-Threads		Completion Time		Avg Time / Game
-4			9.4 				94
-3			10.2				102
-2			12.9				129
-1			22.1				221
+Threads		Completion Time(s)		Avg Time / Game(µs)
+4			9.4 					94
+3			10.2					102
+2			12.9					129
+1			22.1					221
 
 
 i7-4790K @ 4.30GHz, 4 Core(s), 8 Logical Processor(s)
 
 100,000 Games
 
-Threads		Completion Time		Avg Time / Game
-8			3.3 				33
-7			3.4 				34
-6			3.6 				36
-5			3.9 				39
-4			4.4 				44
-3			5.4 				54
-2			7.4 				74
-1			14.4				144
+Threads		Completion Time(s)		Avg Time / Game(µs)
+8			3.3 					33
+7			3.4 					34
+6			3.6 					36
+5			3.9 					39
+4			4.4 					44
+3			5.4 					54
+2			7.4 					74
+1			14.4					144

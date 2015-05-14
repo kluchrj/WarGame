@@ -62,7 +62,7 @@ namespace WarGUI
                 // Create array of arugments to pass
                 List<object> Arguments = new List<object>();
 
-                Arguments.Add((long)num_iterations.Value);  // Iterations
+                Arguments.Add((long)num_iterations.Value);  // Games
                 Arguments.Add(cb_dealfirst.SelectedIndex);  // Deal first
                 Arguments.Add(chk_fastshuffle.Checked);     // Fast shuffle
                 Arguments.Add(chk_jokers.Checked);          // Jokers
@@ -271,7 +271,7 @@ namespace WarGUI
             double _Progress = (double)Progress / (double)num_iterations.Value * 100;
 
             pbar_progress.Value = (int)_Progress;
-            lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", (int)_Progress, Progress, (int)num_iterations.Value);
+            lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", (int)_Progress, Progress, num_iterations.Value);
 
             LastUpdated.Restart();
         }
