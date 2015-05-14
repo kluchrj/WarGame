@@ -12,7 +12,7 @@ namespace WarGUI
     public partial class War : Form
     {
         private TimeSpan gameTime;
-        private StatsInfo OverallStats;
+        private GameStats OverallStats;
 
         // Keeps track of how often the UI is updated
         Stopwatch LastUpdated = new Stopwatch();
@@ -24,7 +24,7 @@ namespace WarGUI
         {
             InitializeComponent();
 
-            OverallStats = new StatsInfo();
+            OverallStats = new GameStats();
 
             num_iterations.Maximum = long.MaxValue;
             num_threads.Value = num_threads.Maximum = Environment.ProcessorCount;
@@ -79,7 +79,7 @@ namespace WarGUI
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            OverallStats = new StatsInfo();
+            OverallStats = new GameStats();
             gameTime = TimeSpan.Zero;
 
             lbl_cwin_val.Text = "0 (0%)";
@@ -191,7 +191,7 @@ namespace WarGUI
             // Start a parallel loop for each thread
             Parallel.For(0, WarThreads, i =>
             {
-                StatsInfo stat = new StatsInfo(Start);
+                GameStats stat = new GameStats(Start);
 
                 // Create decks for each player, plus a deck to draw cards from
                 List<Deck> CardDeck = new List<Deck>();
@@ -213,28 +213,8 @@ namespace WarGUI
                         deal = !deal;
                     else if (dealFirst == 3)
                         deal = Convert.ToBoolean(ThreadSafeRandom.ThisThreadsRandom.Next(0, 2));
-
-                    GameInfo result = RunGame(CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
-
-                    if (result.GetWiner == Winner.Player)
-                    {
-                        stat.PlayerWins++;
-                        if (result.PlayerWeight > result.ComputerWeight)
-                            stat.CorrectPred++;
-                    }
-                    else if (result.GetWiner == Winner.Computer)
-                    {
-                        stat.ComputerWins++;
-                        if (result.ComputerWeight > result.PlayerWeight)
-                            stat.CorrectPred++;
-                    }
-                    else
-                        stat.Draws++;
-
-                    stat.ComputerWeight += result.ComputerWeight;
-                    stat.PlayerWeight += result.PlayerWeight;
-
-                    stat.Turns += (double)result.Turns;
+                        
+                    RunGame(stat, CardDeck, PlayerDeck, ComputerDeck, (bool)Args[2], deal);
 
                     PlayerDeck.Clear();
                     ComputerDeck.Clear();
@@ -276,11 +256,11 @@ namespace WarGUI
             LastUpdated.Restart();
         }
 
-        void Finish(StatsInfo s)
+        void Finish(GameStats s)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new Action<StatsInfo>(Finish), new object[] { s });
+                BeginInvoke(new Action<GameStats>(Finish), new object[] { s });
                 return;
             }
 
@@ -329,7 +309,7 @@ namespace WarGUI
         // War Game Functions
         //----------------------------------------------------------------------------------------------------------
 
-        private GameInfo RunGame(List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
+        private void RunGame(GameStats g, List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
         {
             if (FastShuffle)
                 CardDeck.FastShuffle();
@@ -339,13 +319,11 @@ namespace WarGUI
             DealCards(PlayerDeck, ComputerDeck, CardDeck, DealFirst);
 
             // Calculate hand weight for each player
-            int PlayerWeight = 0, ComputerWeight = 0;
-
             foreach (Deck c in PlayerDeck)
-                PlayerWeight += c.Value - 8;
+                g.PlayerWeight += c.Value - 8;
 
             foreach (Deck c in ComputerDeck)
-                ComputerWeight += c.Value - 8;
+                g.ComputerWeight += c.Value - 8;
 
             // Create temporary deck to store cards in
             List<Deck> Temp = new List<Deck>();
@@ -378,11 +356,13 @@ namespace WarGUI
             }
 
             if (PlayerDeck.Count == 0 && ComputerDeck.Count == 0) // There was a tie for every card!
-                return new GameInfo(Winner.Draw, ComputerWeight, PlayerWeight, turns);
+                g.Draws++;
             else if (ComputerDeck.Count == 0)
-                return new GameInfo(Winner.Player, ComputerWeight, PlayerWeight, turns);
+                g.PlayerWins++;
             else
-                return new GameInfo(Winner.Computer, ComputerWeight, PlayerWeight, turns);
+                g.ComputerWins++;
+
+            g.Turns += turns;
         }
 
         void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
@@ -472,7 +452,7 @@ namespace WarGUI
         // Stats
         //----------------------------------------------------------------------------------------------------------
 
-        void UpdateStats(StatsInfo stats)
+        void UpdateStats(GameStats stats)
         {
             if (stats.Total < 1)
                 return;

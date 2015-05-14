@@ -9,11 +9,11 @@ namespace WarGUI
     /// <summary>
     /// Stores the following info about a set of games:
     ///     Player / Computer wins and Draws
-    ///     Predictions based on card weight
+    ///     Overall card weight of both players
     ///     Start time of the operation
-    ///     Weights of the player and computer
+    ///     Total number of turns taken
     /// </summary>
-    class StatsInfo
+    class GameStats
     {
         // Variables
         private int playerwins;
@@ -64,14 +64,14 @@ namespace WarGUI
             set { turns = value; }
         }
 
-        public StatsInfo() { }
+        public GameStats() { }
 
-        public StatsInfo(DateTime time)
+        public GameStats(DateTime time)
         {
             Start = time;
         }
 
-        public void AddToStats(StatsInfo s)
+        public void AddToStats(GameStats s)
         {
             Start = s.Time;
             this.ComputerWeight += s.ComputerWeight;
