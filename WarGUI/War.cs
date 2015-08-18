@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -38,7 +36,7 @@ namespace WarGUI
             cb_dealfirst.SelectedIndex = 2;
         }
 
-        # region UI
+        #region UI
 
         // UI
         //----------------------------------------------------------------------------------------------------------
@@ -101,37 +99,6 @@ namespace WarGUI
         private void btn_clearlog_Click(object sender, EventArgs e)
         {
             lbox_log.Items.Clear();
-        }
-
-        // Start simulating when we press enter
-        private void num_iterations_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Return)
-                btn_start_Click(sender, e);
-        }
-
-        private void num_threads_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Return)
-                btn_start_Click(sender, e);
-        }
-
-        private void chk_jokers_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Return)
-                btn_start_Click(sender, e);
-        }
-
-        private void chk_fastshuffle_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Return)
-                btn_start_Click(sender, e);
-        }
-
-        private void cb_dealfirst_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Return)
-                btn_start_Click(sender, e);
         }
 
         void LogMessage(String Msg)
