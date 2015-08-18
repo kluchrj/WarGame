@@ -77,7 +77,7 @@ namespace WarGUI
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            OverallStats = new GameStats();
+            OverallStats.ClearStats();
             gameTime = TimeSpan.Zero;
 
             lbl_cwin_val.Text = "0 (0%)";
@@ -113,6 +113,7 @@ namespace WarGUI
             if (WarWorker.IsBusy)
                 WarWorker.CancelAsync();
         }
+
         # endregion
 
         #region Worker

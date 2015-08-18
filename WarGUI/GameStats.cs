@@ -78,5 +78,17 @@ namespace WarGUI
             this.PlayerWins += s.PlayerWins;
             this.Turns += s.Turns;
         }
+
+        public void ClearStats()
+        {
+            playerwins = 0;
+            computerwins = 0;
+            draws = 0;
+            correctpred = 0;
+            playerweight = 0;
+            computerweight = 0;
+            
+            turns = 0;
+        }
     }
 }
