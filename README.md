@@ -1,4 +1,4 @@
 # WarGame
-A C# implementation of the card game war written in VS 2013.
+A C# implementation of the card game war written in Visual Studio.
 
-War is a simple console application whilst WarGUI is more of a benchmarker.
+War is a simple console application whilst WarGUI is a benchmarker.

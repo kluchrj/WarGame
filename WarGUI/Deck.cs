@@ -1,18 +1,11 @@
-﻿using System;
-
-namespace WarGUI
+﻿namespace WarGUI
 {
     public enum CardSuits { Spades, Diamonds, Clubs, Hearts }
     public enum CardNames { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
     public abstract class Deck
     {
-        protected int value;
-
-        public int Value
-        {
-            get { return value; }
-        }
+        public abstract int Value { get; }
     }
 
     public class Card : Deck
@@ -20,14 +13,18 @@ namespace WarGUI
         private CardSuits suit;
         private CardNames name;
 
+        public override int Value
+        {
+            get { return (int)name; }
+        }
+
         public Card(CardSuits suit, CardNames name) 
         {
             this.suit = suit;
             this.name = name;
-            value = (int)name;
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return name + " of " + suit;
         }
@@ -35,12 +32,14 @@ namespace WarGUI
 
     public class Joker : Deck
     {
-        public Joker()
+        public Joker() { }
+
+        public override int Value
         {
-            value = 15;
+            get { return 15; }
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return "Joker";
         }

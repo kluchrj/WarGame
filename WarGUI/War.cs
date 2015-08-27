@@ -101,7 +101,7 @@ namespace WarGUI
             lbox_log.Items.Clear();
         }
 
-        void LogMessage(String Msg)
+        private void LogMessage(string Msg)
         {
             lbox_log.Items.Add(String.Format("[{0}] {1}", DateTime.Now, Msg));
             lbox_log.TopIndex = lbox_log.Items.Count - 1; // Scroll to bottom
@@ -116,9 +116,9 @@ namespace WarGUI
 
         # endregion
 
-        #region Worker
+        #region Threading
 
-        // Worker functions
+        // Threading functions
         //----------------------------------------------------------------------------------------------------------
 
         private void WarWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -202,7 +202,7 @@ namespace WarGUI
                 e.Cancel = true;
         }
 
-        void UpdateProgress(long p)
+        private void UpdateProgress(long p)
         {
             if (InvokeRequired)
             {
@@ -219,12 +219,12 @@ namespace WarGUI
             double _Progress = (double)Progress / (double)num_iterations.Value * 100;
 
             pbar_progress.Value = (int)_Progress;
-            lbl_status.Text = string.Format("Simulating {0}% ({1}/{2})", (int)_Progress, Progress, num_iterations.Value);
+            lbl_status.Text = string.Format("Simulating {0:0}% ({1}/{2})", _Progress, Progress, num_iterations.Value);
 
             LastUpdated.Restart();
         }
 
-        void Finish(GameStats s)
+        private void Finish(GameStats s)
         {
             if (InvokeRequired)
             {
@@ -277,7 +277,7 @@ namespace WarGUI
         // War Game Functions
         //----------------------------------------------------------------------------------------------------------
 
-        private void RunGame(GameStats g, List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
+        private static void RunGame(GameStats g, List<Deck> CardDeck, Queue<Deck> PlayerDeck, Queue<Deck> ComputerDeck, bool FastShuffle, bool DealFirst)
         {
             if (FastShuffle)
                 CardDeck.FastShuffle();
@@ -333,7 +333,7 @@ namespace WarGUI
             g.Turns += turns;
         }
 
-        void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
+        private static void TieBreaker(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> TempDeck)
         {
             // If a player runs out of cards they loose the tie (and the game)
             if (PlayerDeck.Count == 0 || ComDeck.Count == 0)
@@ -370,7 +370,7 @@ namespace WarGUI
                 TieBreaker(PlayerDeck, ComDeck, TempDeck); // Recurse until there is a looser
         }
 
-        void PopulateDeck(List<Deck> Cards, bool Joker = false)
+        private static void PopulateDeck(List<Deck> Cards, bool Joker = false)
         {
             foreach (CardSuits suit in Enum.GetValues(typeof(CardSuits)))
                 foreach (CardNames name in Enum.GetValues(typeof(CardNames)))
@@ -383,7 +383,7 @@ namespace WarGUI
             }
         }
 
-        void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst)
+        private static void DealCards(Queue<Deck> PlayerDeck, Queue<Deck> ComDeck, List<Deck> CardDeck, bool DealComputerFirst)
         {
             for (int i = 0; i < CardDeck.Count; i++)
             {
@@ -404,9 +404,9 @@ namespace WarGUI
             }
         }
 
-        void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
+        private static void CombineDecks(Queue<Deck> Deck, List<Deck> ToAdd)
         {
-            // Shuffle the input deck to prevent ENDLESS WAR(!) or biased results
+            // Shuffle the input deck to prevent ENDLESS WAR(!) or 'biased' results
             ToAdd.FastShuffle();
 
             foreach (Deck c in ToAdd)
@@ -420,7 +420,7 @@ namespace WarGUI
         // Stats
         //----------------------------------------------------------------------------------------------------------
 
-        void UpdateStats(GameStats stats)
+        private void UpdateStats(GameStats stats)
         {
             if (stats.Total < 1)
                 return;
@@ -435,7 +435,7 @@ namespace WarGUI
             // Update labels
             lbl_cwin_val.Text = String.Format("{0} ({1:0.###}%)", stats.ComputerWins, ComputerAvg);
             lbl_pwins_val.Text = String.Format("{0} ({1:0.###}%)", stats.PlayerWins, PlayerAvg);
-            lbl_draws_val.Text = String.Format("{0} ({1:0.##}%)", stats.Draws, DrawAvg);
+            lbl_draws_val.Text = String.Format("{0} ({1:0.###}%)", stats.Draws, DrawAvg);
 
             lbl_compweight_val.Text = String.Format("{0:0.##}", (double)stats.ComputerWeight / stats.Total);
             lbl_playerweight_val.Text = String.Format("{0:0.##}", (double)stats.PlayerWeight / stats.Total);

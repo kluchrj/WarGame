@@ -23,6 +23,7 @@ Threads		Completion Time(s)		Avg Time / Game(µs)
 2			7.4 					74
 1			14.4					144
 
+
 i7-4710MQ CPU @ 2.50GHz, 4 Core(s), 8 Logical Processor(s)
 
 100,000 Games
