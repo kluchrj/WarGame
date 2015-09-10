@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "conio.h"
 #include <iostream>
 #include <deque>
@@ -111,7 +110,6 @@ int main()
 static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<Card*>& TempDeck)
 {
 	// If a player runs out of cards they loose
-
 	if (PlayerDeck.size() == 0 || ComDeck.size() == 0)
 		return;
 
