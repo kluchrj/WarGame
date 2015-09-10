@@ -1,4 +1,6 @@
-﻿i7-3540M @ 3.00GHz, 2 Core(s), 4 Logical Processor(s)
+﻿Benchmarks for the C# Forms Application
+
+i7-3540M @ 3.00GHz, 2 Core(s), 4 Logical Processor(s)
 
 100,00 Games
 
