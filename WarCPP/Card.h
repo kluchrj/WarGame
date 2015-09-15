@@ -8,12 +8,12 @@ class Card
 {
 	virtual std::ostream& doprint(std::ostream&) const = 0;
 public:
+	virtual ~Card() { }
 	virtual int Value() = 0;
 	virtual std::string Print() const = 0;
 	friend std::ostream& operator<<(std::ostream& os, const Card& c) {
 		return c.doprint(os);
 	}
-	virtual ~Card() { }
 };
 
 class FaceCard : public Card
