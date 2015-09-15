@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WarCPP", "WarCPP\WarCPP.vcxproj", "{E496CE7B-7B5B-4D4A-B48C-5D7286E4F8F0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WarConsole", "WarConsole\WarConsole.vcxproj", "{E496CE7B-7B5B-4D4A-B48C-5D7286E4F8F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
