@@ -1,8 +1,9 @@
-#include "conio.h"
-#include <deque>
-#include <vector>
 #include <algorithm>
+#include <deque>
+#include <ppl.h>
+#include <vector>
 #include <Windows.h>
+#include "conio.h"
 
 #include "Card.h"
 
@@ -16,63 +17,89 @@ static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<C
 int main()
 {
 	cout << "Enter the number of games to simulate: ";
-	unsigned int iterations;
+	unsigned iterations;
 	cin >> iterations;
 
-	// Performace tracking
+	// Grab # of logical cores
+	unsigned threads = thread::hardware_concurrency();
+	cout << "Enter number of threads (detected " << threads << "): ";
+	cin >> threads;
+
+	// Ugly windows performace tracking
 	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
 	LARGE_INTEGER Frequency;
 	
 	QueryPerformanceFrequency(&Frequency);
 	QueryPerformanceCounter(&StartingTime);
 
-	// Set up the Deck
-	vector<Card*> MasterDeck;
-	PopulateDeck(MasterDeck);
+	// Stats (Playerwins, Computerwins, Draws)
+	unsigned Stats[] = { 0, 0, 0 };
 
-	// Stats
-	unsigned int PlayerWins = 0;
-	unsigned int ComputerWins = 0;
-	unsigned int Draws = 0;
+	// Calculate the workload for each thread
+	vector<int> workload;
 
-	for (unsigned int i = 0; i < iterations; i++)
+	unsigned extra = iterations % threads;
+	unsigned perIteration = (iterations - extra) / threads;
+
+	for (unsigned i = 0; i < threads; i++)
 	{
-		random_shuffle(MasterDeck.begin(), MasterDeck.end()); // TODO: Is this random enough?
-
-		// Set up the Player and Computer's decks
-		deque<Card*> PlayerDeck;
-		deque<Card*> ComputerDeck;
-		vector<Card*> TempDeck;
-
-		DealCards(PlayerDeck, ComputerDeck, MasterDeck);
-	
-		// Main game loop
-		while (PlayerDeck.size() > 0 && ComputerDeck.size() > 0)
+		if (extra > 0)
 		{
-			Card * PlayerCard = PlayerDeck[0];
-			PlayerDeck.pop_front();
-
-			Card * ComputerCard = ComputerDeck[0];
-			ComputerDeck.pop_front();
-
-			TempDeck.push_back(PlayerCard);
-			TempDeck.push_back(ComputerCard);
-
-			if (PlayerCard->Value() > ComputerCard->Value())
-				CombineDecks(PlayerDeck, TempDeck);
-			else if (ComputerCard->Value() > PlayerCard->Value())
-				CombineDecks(ComputerDeck, TempDeck);
-			else
-				TieBreaker(PlayerDeck, ComputerDeck, TempDeck);
+			workload.push_back(perIteration + 1);
+			extra--;
 		}
-
-		if (PlayerDeck.size() == 0 && ComputerDeck.size() == 0) // There was a tie for every card!
-			Draws++;
-		else if (ComputerDeck.size() == 0)
-			PlayerWins++;
 		else
-			ComputerWins++;
+			workload.push_back(perIteration);
 	}
+
+	Concurrency::parallel_for(0, (int)threads, [&](int i)
+	{
+		// Set up the Deck
+		vector<Card*> MasterDeck;
+		PopulateDeck(MasterDeck);
+
+		for (int j = 0; j < workload[i]; j++)
+		{
+			random_shuffle(MasterDeck.begin(), MasterDeck.end()); // TODO: Is this random enough? Thread safe?
+
+			// Set up the Player and Computer's decks
+			deque<Card*> PlayerDeck;	
+			deque<Card*> ComputerDeck;
+			vector<Card*> TempDeck;
+
+			DealCards(PlayerDeck, ComputerDeck, MasterDeck);
+		
+			// Main game loop
+			while (PlayerDeck.size() > 0 && ComputerDeck.size() > 0)
+			{
+				Card * PlayerCard = PlayerDeck[0];
+				PlayerDeck.pop_front();
+
+				Card * ComputerCard = ComputerDeck[0];
+				ComputerDeck.pop_front();
+
+				TempDeck.push_back(PlayerCard);
+				TempDeck.push_back(ComputerCard);
+
+				if (PlayerCard->Value() > ComputerCard->Value())
+					CombineDecks(PlayerDeck, TempDeck);
+				else if (ComputerCard->Value() > PlayerCard->Value())
+					CombineDecks(ComputerDeck, TempDeck);
+				else
+					TieBreaker(PlayerDeck, ComputerDeck, TempDeck);
+			}
+
+			if (PlayerDeck.size() == 0 && ComputerDeck.size() == 0) // Tie
+				Stats[2]++;
+			else if (ComputerDeck.size() == 0) // Player Win
+				Stats[0]++;
+			else // Computer win
+				Stats[1]++;
+		}
+		// Clean up our mess
+		for (unsigned i = 0; i < MasterDeck.size(); i++)
+			delete MasterDeck[i];
+	});
 
 	// Compute performance results
 	QueryPerformanceCounter(&EndingTime);
@@ -81,35 +108,30 @@ int main()
 	ElapsedMicroseconds.QuadPart *= 1000000;
 	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
 	
-	cout << "Player wins: " << PlayerWins << endl
-		<< "Computer wins: " << ComputerWins << endl
-		<< "Draws: " << Draws << endl;
+	cout << endl << "Player wins: " << Stats[0] << endl
+		<< "Computer wins: " << Stats[1] << endl
+		<< "Draws: " << Stats[2] << endl;
 
 	cout << endl << "Completed in: ";
 
+	// Format and output
 	if (ElapsedMicroseconds.QuadPart < 1000)
-	{
-		cout << ElapsedMicroseconds.QuadPart << " microseconds" << endl;
-	}
+		cout << ElapsedMicroseconds.QuadPart << " us" << endl;
 	else if (ElapsedMicroseconds.QuadPart < 1e+6)
 	{
 		double ms = (double)ElapsedMicroseconds.QuadPart / 1000.0;
-		cout << ms << " miliseconds" << endl;
+		cout << ms << " ms" << endl;
 	}
 	else
 	{
 		double seconds = (double)ElapsedMicroseconds.QuadPart / (double)1e+6;
-		cout << seconds << " seconds" << endl;
+		cout << seconds << " s" << endl;
 	}
 
-	cout << "Avg microseconds / game: "
-		<< (double)ElapsedMicroseconds.QuadPart / (double)iterations << endl;
+	cout << "Average time per game: "
+		<< (double)ElapsedMicroseconds.QuadPart / (double)iterations << " us" << endl;
 
 	_getch();
-
-	// Clean up the heap
-	for (unsigned int i = 0; i < MasterDeck.size(); i++)
-		delete MasterDeck[i];
 
     return 0;
 }
@@ -168,8 +190,8 @@ static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<C
 
 static void PopulateDeck(vector<Card*>& Deck, bool Joker)
 {
-	for (int i = CardSuit::Clubs; i <= CardSuit::Spades; i++)
-		for (int j = CardName::Two; j <= CardName::Ace; j++)
+	for (unsigned i = CardSuit::Clubs; i <= CardSuit::Spades; i++)
+		for (unsigned j = CardName::Two; j <= CardName::Ace; j++)
 			Deck.push_back(new FaceCard(static_cast<CardSuit>(i), static_cast<CardName>(j)));
 
 	if (Joker)
@@ -181,7 +203,7 @@ static void PopulateDeck(vector<Card*>& Deck, bool Joker)
 
 static void DealCards(deque<Card*> &PlayerDeck, deque<Card*>& ComDeck, const vector<Card*>& CardDeck)
 {
-	for (unsigned int i = 0; i < CardDeck.size(); i++)
+	for (unsigned i = 0; i < CardDeck.size(); i++)
 	{
 		if (i % 2 == 0)
 			ComDeck.push_back(CardDeck[i]);
@@ -195,7 +217,7 @@ static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd)
 	// Shuffle the pool of cards to prevent ENDLESS WAR
 	random_shuffle(ToAdd.begin(), ToAdd.end());
 
-	for (unsigned int i = 0; i < ToAdd.size(); i++)
+	for (unsigned i = 0; i < ToAdd.size(); i++)
 		Deck.push_back(ToAdd[i]);
 
 	ToAdd.clear();
