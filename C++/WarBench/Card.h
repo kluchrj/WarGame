@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-enum CardSuit { Clubs, Diamonds, Hearts, Spades };
-enum CardName { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
+const enum CardSuit { Clubs, Diamonds, Hearts, Spades };
+const enum CardName { Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
 
 class Card
 {

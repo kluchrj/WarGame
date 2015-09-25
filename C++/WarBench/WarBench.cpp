@@ -1,15 +1,16 @@
 #include <algorithm>
 #include <deque>
 #include <ppl.h>
+#include <random>
 #include <vector>
 #include <Windows.h>
-#include "conio.h"
 
+#include "conio.h"
 #include "Card.h"
 
 using namespace std;
 
-static void PopulateDeck(vector<Card*>& Deck, bool Joker = false);
+static void PopulateDeck(vector<Card*>& Deck, const bool Joker = false);
 static void DealCards(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, const vector<Card*>& CardDeck);
 static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd);
 static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<Card*>& TempDeck);
@@ -55,12 +56,14 @@ int main()
 	Concurrency::parallel_for(0, (int)threads, [&](int i)
 	{
 		// Set up the Deck
-		vector<Card*> MasterDeck;
+		vector<Card*> MasterDeck;	// shared_ptr adds ~50% overhead vs dumb pointers
 		PopulateDeck(MasterDeck);
 
+		auto engine = default_random_engine{};
+		
 		for (int j = 0; j < workload[i]; j++)
 		{
-			random_shuffle(MasterDeck.begin(), MasterDeck.end()); // TODO: Is this random enough? Thread safe?
+			shuffle(MasterDeck.begin(), MasterDeck.end(), engine);
 
 			// Set up the Player and Computer's decks
 			deque<Card*> PlayerDeck;	
@@ -91,17 +94,17 @@ int main()
 
 			if (PlayerDeck.size() == 0 && ComputerDeck.size() == 0) // Tie
 				Stats[2]++;
-			else if (ComputerDeck.size() == 0) // Player Win
+			else if (ComputerDeck.size() == 0)						// Player Win
 				Stats[0]++;
-			else // Computer win
+			else													// Computer win
 				Stats[1]++;
 		}
-		// Clean up our mess
+		// Clean up
 		for (unsigned i = 0; i < MasterDeck.size(); i++)
 			delete MasterDeck[i];
 	});
 
-	// Compute performance results
+	// Compute perf results
 	QueryPerformanceCounter(&EndingTime);
 	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
 
@@ -188,7 +191,7 @@ static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<C
 	}
 }
 
-static void PopulateDeck(vector<Card*>& Deck, bool Joker)
+static void PopulateDeck(vector<Card*>& Deck, const bool Joker)
 {
 	for (unsigned i = CardSuit::Clubs; i <= CardSuit::Spades; i++)
 		for (unsigned j = CardName::Two; j <= CardName::Ace; j++)
@@ -201,7 +204,7 @@ static void PopulateDeck(vector<Card*>& Deck, bool Joker)
 	}
 }
 
-static void DealCards(deque<Card*> &PlayerDeck, deque<Card*>& ComDeck, const vector<Card*>& CardDeck)
+static void DealCards(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, const vector<Card*>& CardDeck)
 {
 	for (unsigned i = 0; i < CardDeck.size(); i++)
 	{
@@ -215,8 +218,8 @@ static void DealCards(deque<Card*> &PlayerDeck, deque<Card*>& ComDeck, const vec
 static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd)
 {
 	// Shuffle the pool of cards to prevent ENDLESS WAR
-	random_shuffle(ToAdd.begin(), ToAdd.end());
-
+	random_shuffle(ToAdd.begin(), ToAdd.end());		// Deprecated in C++17, but it's fast 
+													// and we don't care about randomness
 	for (unsigned i = 0; i < ToAdd.size(); i++)
 		Deck.push_back(ToAdd[i]);
 
