@@ -94,9 +94,9 @@ int main()
 
 			if (PlayerDeck.size() == 0 && ComputerDeck.size() == 0) // Tie
 				Stats[2]++;
-			else if (ComputerDeck.size() == 0)						// Player Win
+			else if (ComputerDeck.size() == 0) // Player Win
 				Stats[0]++;
-			else													// Computer win
+			else // Computer win
 				Stats[1]++;
 		}
 		// Clean up
@@ -217,9 +217,13 @@ static void DealCards(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, const vec
 
 static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd)
 {
-	// Shuffle the pool of cards to prevent ENDLESS WAR
-	random_shuffle(ToAdd.begin(), ToAdd.end());		// Deprecated in C++17, but it's fast 
-													// and we don't care about randomness
+	// We shuffle the pool of cards to prevent an instance
+	// where a game can loop forever with no victor
+
+	// Randomness isn't really important here, just speed
+	// TODO: do this with shuffle, random_shuffle is deprecated in C++14
+	random_shuffle(ToAdd.begin(), ToAdd.end());
+	
 	for (unsigned i = 0; i < ToAdd.size(); i++)
 		Deck.push_back(ToAdd[i]);
 
