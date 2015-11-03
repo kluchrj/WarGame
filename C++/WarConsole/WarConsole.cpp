@@ -1,13 +1,15 @@
-#include "conio.h"
-#include <deque>
-#include <vector>
 #include <algorithm>
+#include <deque>
+#include <random>
+#include <vector>
+
+#include "conio.h"
 
 #include "Card.h"
 
 using namespace std;
 
-static void PopulateDeck(vector<Card*>& Deck, bool Joker = false);
+static void PopulateDeck(vector<Card*>& Deck, const bool Joker = false);
 static void DealCards(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, const vector<Card*>& CardDeck);
 static void PrintDecks(const deque<Card*>& AQueue, const deque<Card*>& BQueue);
 static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd);
@@ -29,7 +31,9 @@ int main()
 	vector<Card*> MasterDeck;
 
 	PopulateDeck(MasterDeck, jokers);
-	random_shuffle(MasterDeck.begin(), MasterDeck.end()); // TODO: Is this random enough?
+
+	auto engine = default_random_engine{};
+	shuffle(MasterDeck.begin(), MasterDeck.end(), engine);
 
 	// Set up the Player and Computer's decks
 	deque<Card*> PlayerDeck;
@@ -37,9 +41,9 @@ int main()
 	vector<Card*> TempDeck;
 
 	DealCards(PlayerDeck, ComputerDeck, MasterDeck);
-
 	cout << "\nPrint decks? (y/n) ";
 	cin >> input;
+
 
 	if (tolower(input[0]) == 'y')
 	{
@@ -174,7 +178,7 @@ static void TieBreaker(deque<Card*>& PlayerDeck, deque<Card*>& ComDeck, vector<C
 	}
 }
 
-static void PopulateDeck(vector<Card*>& Deck, bool Joker)
+static void PopulateDeck(vector<Card*>& Deck, const bool Joker)
 {
 	for (int i = CardSuit::Clubs; i <= CardSuit::Spades; i++)
 		for (int j = CardName::Two; j <= CardName::Ace; j++)
@@ -200,7 +204,11 @@ static void DealCards(deque<Card*> &PlayerDeck, deque<Card*>& ComDeck, const vec
 
 static void CombineDecks(deque<Card*>& Deck, vector<Card*>& ToAdd)
 {
-	// Shuffle the pool of cards to prevent ENDLESS WAR
+	// We shuffle the pool of cards to prevent an instance
+	// where a game can loop forever with no victor
+
+	// Randomness isn't really important here, just speed
+	// TODO: do this with shuffle, random_shuffle is deprecated in C++14
 	random_shuffle(ToAdd.begin(), ToAdd.end());
 
 	for (unsigned int i = 0; i < ToAdd.size(); i++)
