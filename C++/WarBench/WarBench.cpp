@@ -1,9 +1,9 @@
 #include <algorithm>
+#include <chrono>
 #include <deque>
 #include <ppl.h>
 #include <random>
 #include <vector>
-#include <Windows.h>
 
 #include "conio.h"
 #include "Card.h"
@@ -26,12 +26,9 @@ int main()
 	cout << "Enter number of threads (detected " << threads << "): ";
 	cin >> threads;
 
-	// Ugly windows performace tracking
-	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
-	LARGE_INTEGER Frequency;
-	
-	QueryPerformanceFrequency(&Frequency);
-	QueryPerformanceCounter(&StartingTime);
+	// Performace tracking
+	typedef chrono::high_resolution_clock Clock;
+	auto t1 = Clock::now();
 
 	// Stats (Playerwins, Computerwins, Draws)
 	unsigned Stats[] = { 0, 0, 0 };
@@ -104,13 +101,10 @@ int main()
 			delete MasterDeck[i];
 	});
 
-	// Compute perf results
-	QueryPerformanceCounter(&EndingTime);
-	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+	// Perf
+	auto t2 = Clock::now();
+	auto td = t2 - t1;
 
-	ElapsedMicroseconds.QuadPart *= 1000000;
-	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-	
 	cout << endl << "Player wins: " << Stats[0] << endl
 		<< "Computer wins: " << Stats[1] << endl
 		<< "Draws: " << Stats[2] << endl;
@@ -118,21 +112,26 @@ int main()
 	cout << endl << "Completed in: ";
 
 	// Format and output
-	if (ElapsedMicroseconds.QuadPart < 1000)
-		cout << ElapsedMicroseconds.QuadPart << " us" << endl;
-	else if (ElapsedMicroseconds.QuadPart < 1e+6)
+	if (td.count() < 1000)
+		cout << td.count() << " ns" << endl;
+	else if (td.count() < 1e+6)
 	{
-		double ms = (double)ElapsedMicroseconds.QuadPart / 1000.0;
+		double us = (double)td.count() / 1000.0;
+		cout << us << " us" << endl;
+	}
+	else if (td.count() < 1e+9)
+	{
+		double ms = (double)td.count() / 1e+6;
 		cout << ms << " ms" << endl;
 	}
 	else
 	{
-		double seconds = (double)ElapsedMicroseconds.QuadPart / (double)1e+6;
+		double seconds = (double)td.count() / 1e+9;
 		cout << seconds << " s" << endl;
 	}
 
 	cout << "Average time per game: "
-		<< (double)ElapsedMicroseconds.QuadPart / (double)iterations << " us" << endl;
+		<< (double)td.count() / (double)iterations / 1000.0 << " us" << endl;
 
 	_getch();
 
